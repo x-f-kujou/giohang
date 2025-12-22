@@ -205,28 +205,6 @@ function sendOrder() {
     return;
   }
 
-  let text = `🛒 ĐƠN HÀNG%0A`;
-  text += `👤 ${name}%0A📞 ${phone}%0A🏠 ${address}%0A%0A`;
-
-  let total = 0;
-  cart.forEach(p => {
-    total += p.price * p.qty;
-    text += `- ${p.name} x${p.qty}: ${formatPrice(p.price * p.qty)}%0A`;
-  });
-
-  text += `%0ATỔNG: ${formatPrice(total)}`;
-
-  <script>
-function sendOrder() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
-
-  if (!name || !phone || !address) {
-    alert("Vui lòng nhập đầy đủ thông tin");
-    return;
-  }
-
   if (cart.length === 0) {
     alert("Giỏ hàng trống");
     return;
@@ -234,29 +212,26 @@ function sendOrder() {
 
   const total = cart.reduce((s, p) => s + p.price * p.qty, 0);
 
-  const payload = {
-    name,
-    phone,
-    address,
-    products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
-    total
-  };
-
+  // 👉 GỬI GOOGLE SHEET
   fetch(SCRIPT_URL, {
     method: "POST",
-    mode: "no-cors",   // ⭐ CỰC QUAN TRỌNG
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name,
+      phone,
+      address,
+      products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
+      total
+    })
   });
 
-  // GỬI ZALO (KHÔNG ĐỢI SERVER)
+  // 👉 MỞ ZALO
   let text = `🛒 ĐƠN HÀNG\n`;
   text += `👤 ${name}\n📞 ${phone}\n🏠 ${address}\n\n`;
 
   cart.forEach(p => {
-    text += `- ${p.name} x${p.qty}: ${(p.price*p.qty).toLocaleString()} đ\n`;
+    text += `- ${p.name} x${p.qty}: ${(p.price * p.qty).toLocaleString()} đ\n`;
   });
 
   text += `\nTỔNG: ${total.toLocaleString()} đ`;
@@ -270,27 +245,6 @@ function sendOrder() {
   alert("✅ Đã gửi đơn thành công");
   location.reload();
 }
-</script>
-
-
-
-    // ✅ MỞ ZALO
-    window.open(
-      `https://zalo.me/${ZALO_PHONE}?text=${text}`,
-      "_blank"
-    );
-
-    // ✅ XÓA GIỎ
-    localStorage.removeItem("cart");
-    cart = [];
-    renderCart();
-  })
-  .catch(err => {
-    alert("Không gửi được đơn");
-    console.error(err);
-  });
-}
-
 
 renderCart();
 </script>
