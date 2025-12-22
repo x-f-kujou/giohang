@@ -1,6 +1,9 @@
+// ================== CONFIG ==================
 const sheetId = "1U7aPpLyUdDa1u1MOhX7i1nq4N-8UzvrlnGjLM6wI9hY";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+// ============================================
 
+// Load danh sách sản phẩm từ Google Sheet
 fetch(url)
   .then(res => res.text())
   .then(text => {
@@ -8,29 +11,44 @@ fetch(url)
     const rows = json.table.rows;
 
     const container = document.getElementById("products");
+    if (!container) return;
+
     container.innerHTML = "";
 
-    rows.forEach(r => {
+    rows.forEach((r, index) => {
+      // ⚠️ Cột theo Sheet của bạn
       const ten = r.c[1]?.v || "";
-      const gia = r.c[2]?.v || "";
+      let gia = r.c[2]?.v || 0;
       const anh = r.c[3]?.v || "";
-      const link = r.c[5]?.v || "#";
+
+      // ✅ Ép giá về số (xoá dấu . , ₫ ...)
+      gia = Number(String(gia).replace(/[^\d]/g, ""));
+
+      // Bỏ qua dòng không hợp lệ
+      if (!ten || !gia || !anh) return;
+
+      const product = {
+        id: index + 1,   // ID số, ổn định
+        name: ten,
+        price: gia,
+        image: anh
+      };
 
       container.innerHTML += `
         <div class="product">
-          <img src="${anh}" alt="${ten}">
-          <h3>${ten}</h3>
-          <div class="price">${gia} ₫</div>
-          <button onclick='addToCart(${JSON.stringify({
-            id: ten,
-            name: ten,
-            price: gia,
-            image: anh
-          })})'>
+          <img src="${product.image}" alt="${product.name}">
+          <h3>${product.name}</h3>
+          <div class="price">${product.price.toLocaleString()} ₫</div>
+          <button onclick='addToCart(${JSON.stringify(product)})'>
             Mua ngay
           </button>
-
         </div>
       `;
     });
+  })
+  .catch(err => {
+    console.error("❌ Lỗi load sản phẩm:", err);
   });
+
+/* =================================================
+   Ghi chú QUAN TRỌNG:
