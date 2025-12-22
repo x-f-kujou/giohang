@@ -2,18 +2,32 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Admin - Đơn hàng</title>
+<title>Admin - Quản lý đơn hàng</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f5f5f5;
+  background: #f4f6f8;
   padding: 15px;
 }
 
 h1 {
   text-align: center;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.refresh {
+  background: #28a745;
+  color: #fff;
+  margin-bottom: 10px;
 }
 
 table {
@@ -43,38 +57,32 @@ tr:hover {
 .badge {
   padding: 4px 8px;
   border-radius: 6px;
-  color: #fff;
   font-size: 12px;
+  color: #fff;
+  display: inline-block;
 }
 
 .cod { background: #28a745; }
 .ck { background: #17a2b8; }
-
 .chua { background: #dc3545; }
 .dack { background: #28a745; }
 
-.refresh {
-  margin: 10px 0;
-  padding: 8px 12px;
-  border: none;
-  background: #28a745;
-  color: #fff;
-  border-radius: 6px;
-  cursor: pointer;
+@media(max-width: 768px) {
+  th, td { font-size: 12px; }
 }
 </style>
 </head>
 
 <body>
 
-<h1>📦 Quản lý đơn hàng</h1>
+<h1>📦 ADMIN – DANH SÁCH ĐƠN HÀNG</h1>
 <button class="refresh" onclick="loadOrders()">🔄 Tải lại</button>
 
 <table>
 <thead>
 <tr>
   <th>Thời gian</th>
-  <th>Khách hàng</th>
+  <th>Khách</th>
   <th>SĐT</th>
   <th>Địa chỉ</th>
   <th>Sản phẩm</th>
@@ -87,11 +95,10 @@ tr:hover {
 </table>
 
 <script>
-/* ================== CONFIG ================== */
-// LINK CSV PUBLISH TỪ GOOGLE SHEET
+/* ====== LINK CSV GOOGLE SHEET ====== */
 const SHEET_CSV =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
-/* ============================================ */
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vQhNEMtr69GY61dWW0OtAZXnYfyDm3zNWStlbDL5ZbXUPHWz4RXRw94fUqrGICYMApQK6OYsVLl2p59/pub?gid=0&single=true&output=csv";
+/* ================================= */
 
 function loadOrders() {
   fetch(SHEET_CSV)
@@ -101,35 +108,40 @@ function loadOrders() {
       const tbody = document.getElementById("orders");
       tbody.innerHTML = "";
 
-      rows.forEach(r => {
-        const c = r.split(",");
+      rows.forEach(row => {
+        const c = row.split(",");
         if (c.length < 8) return;
 
-        const paymentBadge =
+        const payment =
           c[6].includes("CK")
-            ? `<span class="badge ck">CK</span>`
+            ? `<span class="badge ck">Chuyển khoản</span>`
             : `<span class="badge cod">COD</span>`;
 
-        const statusBadge =
+        const status =
           c[7].includes("ĐÃ")
             ? `<span class="badge dack">ĐÃ CK</span>`
             : `<span class="badge chua">CHƯA CK</span>`;
 
         tbody.innerHTML += `
-        <tr>
-          <td>${c[0]}</td>
-          <td>${c[1]}</td>
-          <td>${c[2]}</td>
-          <td>${c[3]}</td>
-          <td>${c[4]}</td>
-          <td>${Number(c[5]).toLocaleString()} đ</td>
-          <td>${paymentBadge}</td>
-          <td>${statusBadge}</td>
-        </tr>`;
+          <tr>
+            <td>${c[0]}</td>
+            <td>${c[1]}</td>
+            <td>${c[2]}</td>
+            <td>${c[3]}</td>
+            <td>${c[4]}</td>
+            <td>${Number(c[5]).toLocaleString()} đ</td>
+            <td>${payment}</td>
+            <td>${status}</td>
+          </tr>
+        `;
       });
+    })
+    .catch(() => {
+      alert("❌ Không tải được dữ liệu Sheet");
     });
 }
 
+/* Load khi mở trang */
 loadOrders();
 </script>
 
