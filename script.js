@@ -1,4 +1,4 @@
-const sheetId = "DAN_ID_SHEET_CUA_BAN";
+const sheetId = "ID_GOOGLE_SHEET_CUA_BAN";
 const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
 fetch(url)
@@ -7,6 +7,7 @@ fetch(url)
     const json = JSON.parse(t.substring(47, t.length - 2));
     const rows = json.table.rows;
     const box = document.getElementById("products");
+
     box.innerHTML = "";
 
     rows.forEach(r => {
@@ -30,4 +31,8 @@ fetch(url)
         </div>
       `;
     });
+  })
+  .catch(() => {
+    document.getElementById("products").innerHTML =
+      "<p>Lỗi tải sản phẩm</p>";
   });
