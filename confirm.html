@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Xác nhận thanh toán</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    button {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>✅ Xác nhận đã thanh toán</h2>
+
+<input id="phone" placeholder="Số điện thoại đã đặt hàng">
+<input id="note" placeholder="Ghi chú (VD: CK lúc 10h)">
+
+<button onclick="confirm()">Gửi xác nhận</button>
+
+<script>
+const SCRIPT_URL = "DÁN_URL_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY";
+
+function confirm() {
+  const phone = document.getElementById("phone").value.trim();
+  const note = document.getElementById("note").value.trim();
+
+  if (!phone) {
+    alert("Nhập số điện thoại");
+    return;
+  }
+
+  const url =
+    SCRIPT_URL +
+    "?action=confirm" +
+    "&phone=" + encodeURIComponent(phone) +
+    "&note=" + encodeURIComponent(note);
+
+  fetch(url)
+    .then(() => {
+      alert("✅ Đã gửi xác nhận, shop sẽ kiểm tra!");
+      location.href = "index.html";
+    });
+}
+</script>
+
+</body>
+</html>
