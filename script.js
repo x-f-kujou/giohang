@@ -16,18 +16,17 @@ fetch(url)
     }
 
     rows.forEach(r => {
-      const id   = r.c[0]?.v || "";
-      const ten  = r.c[1]?.v || "";
-      const gia  = Number(r.c[2]?.v || 0);
-      const anh  = r.c[3]?.v || "";
+      const ten = r.c[1]?.v || "";
+      const gia = Number(r.c[2]?.v || 0);
+      const anh = r.c[3]?.v || "";
 
       container.innerHTML += `
         <div class="product">
-          <img src="${anh}" alt="${ten}">
+          <img src="${anh}">
           <h3>${ten}</h3>
-          <div class="price">${gia.toLocaleString("vi-VN")} ₫</div>
+          <div class="price">${gia.toLocaleString()} ₫</div>
           <button onclick='addToCart(${JSON.stringify({
-            id: id,
+            id: ten,
             name: ten,
             price: gia,
             image: anh
@@ -39,7 +38,7 @@ fetch(url)
     });
   })
   .catch(err => {
+    console.error(err);
     document.getElementById("products").innerHTML =
       "<p>Lỗi tải sản phẩm</p>";
-    console.error(err);
   });
