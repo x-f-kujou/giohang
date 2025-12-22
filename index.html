@@ -2,15 +2,33 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Giỏ hàng</title>
+  <title>Danh sách sản phẩm</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h1>Danh sách sản phẩm</h1>
-
 <div id="products" class="grid"></div>
 
 <script src="script.js"></script>
+
+<script>
+function addToCart(product) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  const found = cart.find(p => p.id === product.id);
+
+  if (found) {
+    found.qty += 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  window.location.href = "cart.html";
+}
+</script>
+
 </body>
 </html>
