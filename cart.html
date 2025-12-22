@@ -216,25 +216,62 @@ function sendOrder() {
 
   text += `%0ATỔNG: ${formatPrice(total)}`;
 
-  fetch(SCRIPT_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
+  <script>
+function sendOrder() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const address = document.getElementById("address").value.trim();
+
+  if (!name || !phone || !address) {
+    alert("Vui lòng nhập đầy đủ thông tin");
+    return;
+  }
+
+  if (cart.length === 0) {
+    alert("Giỏ hàng trống");
+    return;
+  }
+
+  const total = cart.reduce((s, p) => s + p.price * p.qty, 0);
+
+  const payload = {
     name,
     phone,
     address,
     products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
     total
-  })
-})
-.then(res => res.text())
-.then(res => {
-  alert("Server trả về: " + res);
-})
-.catch(err => {
-  alert("Fetch lỗi");
-  console.error(err);
-});
+  };
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",   // ⭐ CỰC QUAN TRỌNG
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  // GỬI ZALO (KHÔNG ĐỢI SERVER)
+  let text = `🛒 ĐƠN HÀNG\n`;
+  text += `👤 ${name}\n📞 ${phone}\n🏠 ${address}\n\n`;
+
+  cart.forEach(p => {
+    text += `- ${p.name} x${p.qty}: ${(p.price*p.qty).toLocaleString()} đ\n`;
+  });
+
+  text += `\nTỔNG: ${total.toLocaleString()} đ`;
+
+  window.open(
+    `https://zalo.me/${ZALO_PHONE}?text=${encodeURIComponent(text)}`,
+    "_blank"
+  );
+
+  localStorage.removeItem("cart");
+  alert("✅ Đã gửi đơn thành công");
+  location.reload();
+}
+</script>
+
 
 
     // ✅ MỞ ZALO
