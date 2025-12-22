@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Admin - Đơn hàng</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  padding: 15px;
+}
+
+h1 {
+  text-align: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+th {
+  background: #007bff;
+  color: #fff;
+}
+
+tr:hover {
+  background: #f1f1f1;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.cod { background: #28a745; }
+.ck { background: #17a2b8; }
+
+.chua { background: #dc3545; }
+.dack { background: #28a745; }
+
+.refresh {
+  margin: 10px 0;
+  padding: 8px 12px;
+  border: none;
+  background: #28a745;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📦 Quản lý đơn hàng</h1>
+<button class="refresh" onclick="loadOrders()">🔄 Tải lại</button>
+
+<table>
+<thead>
+<tr>
+  <th>Thời gian</th>
+  <th>Khách hàng</th>
+  <th>SĐT</th>
+  <th>Địa chỉ</th>
+  <th>Sản phẩm</th>
+  <th>Tổng</th>
+  <th>Thanh toán</th>
+  <th>Trạng thái</th>
+</tr>
+</thead>
+<tbody id="orders"></tbody>
+</table>
+
+<script>
+/* ================== CONFIG ================== */
+// LINK CSV PUBLISH TỪ GOOGLE SHEET
+const SHEET_CSV =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
+/* ============================================ */
+
+function loadOrders() {
+  fetch(SHEET_CSV)
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.split("\n").slice(1).reverse();
+      const tbody = document.getElementById("orders");
+      tbody.innerHTML = "";
+
+      rows.forEach(r => {
+        const c = r.split(",");
+        if (c.length < 8) return;
+
+        const paymentBadge =
+          c[6].includes("CK")
+            ? `<span class="badge ck">CK</span>`
+            : `<span class="badge cod">COD</span>`;
+
+        const statusBadge =
+          c[7].includes("ĐÃ")
+            ? `<span class="badge dack">ĐÃ CK</span>`
+            : `<span class="badge chua">CHƯA CK</span>`;
+
+        tbody.innerHTML += `
+        <tr>
+          <td>${c[0]}</td>
+          <td>${c[1]}</td>
+          <td>${c[2]}</td>
+          <td>${c[3]}</td>
+          <td>${c[4]}</td>
+          <td>${Number(c[5]).toLocaleString()} đ</td>
+          <td>${paymentBadge}</td>
+          <td>${statusBadge}</td>
+        </tr>`;
+      });
+    });
+}
+
+loadOrders();
+</script>
+
+</body>
+</html>
