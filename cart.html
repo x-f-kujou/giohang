@@ -123,7 +123,7 @@
 
 <script>
 /* ========= CONFIG ========= */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygl7fZ2TseD2vemwZtoaWSq-X7vnfM2AOtIwjIh9uwobuhG5mGym0zEmVW6vPqi2tt3Q/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXnclHF2Q3LrMWNJmkquR6XT1NoeV2pVTdcS8rs93zrCkEfBAgN03oxQvqoJxbQ-mFtw/exec";
 const ZALO_PHONE = "84358256608";
 /* ========================== */
 
@@ -211,27 +211,24 @@ function sendOrder() {
   }
 
   const total = cart.reduce((s, p) => s + p.price * p.qty, 0);
+  const products = cart.map(p => `${p.name} x${p.qty}`).join(" | ");
 
-  // 👉 GỬI GOOGLE SHEET
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name,
-      phone,
-      address,
-      products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
-      total
-    })
-  });
+  const url =
+    `${SCRIPT_URL}?name=${encodeURIComponent(name)}` +
+    `&phone=${encodeURIComponent(phone)}` +
+    `&address=${encodeURIComponent(address)}` +
+    `&products=${encodeURIComponent(products)}` +
+    `&total=${total}`;
 
-  // 👉 MỞ ZALO
+  // ✅ GỌI GOOGLE SHEET (GET – KHÔNG BỊ CORS)
+  fetch(url);
+
+  // ✅ GỬI ZALO
   let text = `🛒 ĐƠN HÀNG\n`;
   text += `👤 ${name}\n📞 ${phone}\n🏠 ${address}\n\n`;
 
   cart.forEach(p => {
-    text += `- ${p.name} x${p.qty}: ${(p.price * p.qty).toLocaleString()} đ\n`;
+    text += `- ${p.name} x${p.qty}: ${(p.price*p.qty).toLocaleString()} đ\n`;
   });
 
   text += `\nTỔNG: ${total.toLocaleString()} đ`;
@@ -245,6 +242,7 @@ function sendOrder() {
   alert("✅ Đã gửi đơn thành công");
   location.reload();
 }
+
 
 renderCart();
 </script>
