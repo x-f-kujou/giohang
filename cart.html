@@ -234,14 +234,23 @@ function sendOrder() {
       return;
     }
 
-    window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
+    // ✅ MỞ ZALO
+    window.open(
+      `https://zalo.me/${ZALO_PHONE}?text=${text}`,
+      "_blank"
+    );
+
+    // ✅ XÓA GIỎ
     localStorage.removeItem("cart");
+    cart = [];
+    renderCart();
   })
   .catch(err => {
     alert("Không gửi được đơn");
     console.error(err);
   });
 }
+
 
 renderCart();
 </script>
