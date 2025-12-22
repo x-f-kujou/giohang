@@ -218,16 +218,27 @@ function sendOrder() {
 
   // GHI GOOGLE SHEET
   fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name,
-      phone,
-      address,
-      products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
-      total
-    })
-  });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    name,
+    phone,
+    address,
+    products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
+    total
+  })
+})
+.then(res => res.text())
+.then(res => {
+  if (res !== "OK") {
+    alert("Lỗi ghi đơn: " + res);
+    return;
+  }
+
+  window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
+  localStorage.removeItem("cart");
+});
+
 
   // MỞ ZALO
   window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
