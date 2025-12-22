@@ -1,44 +1,50 @@
-const sheetId = "1U7aPpLyUdDa1u1MOhX7i1nq4N-8UzvrlnGjLM6wI9hY";
-const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+// ================= CONFIG =================
+const CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
+// ==========================================
 
-fetch(url)
+fetch(CSV_URL)
   .then(res => res.text())
   .then(text => {
-    // 🔥 CẮT JSON AN TOÀN
-    const jsonText = text.match(/google.visualization.Query.setResponse\((.*)\);/)[1];
-    const json = JSON.parse(jsonText);
+    const rows = text.trim().split("\n").slice(1); // bỏ dòng tiêu đề
 
-    const rows = json.table.rows;
     const container = document.getElementById("products");
     container.innerHTML = "";
 
-    if (!rows || rows.length === 0) {
+    if (rows.length === 0) {
       container.innerHTML = "<p>Không có sản phẩm</p>";
       return;
     }
 
-    rows.forEach(r => {
-      const ten = r.c[1]?.v || "";
-      const gia = Number(r.c[2]?.v || 0);
-      const anh = r.c[3]?.v || "";
+    rows.forEach(row => {
+      const cols = row.split(",");
+
+      const id = cols[0];
+      const ten = cols[1];
+      const gia = Number(cols[2]);
+      const anh = cols[3];
+
+      if (!ten || !gia || !anh) return;
 
       container.innerHTML += `
         <div class="product">
           <img src="${anh}" alt="${ten}">
           <h3>${ten}</h3>
-          <div class="price">${gia.toLocaleString()} ₫</div>
-          <button onclick='addToCart({
-            id: "${ten}",
-            name: "${ten}",
-            price: ${gia},
-            image: "${anh}"
-          })'>Mua ngay</button>
+          <div class="price">${gia.toLocaleString("vi-VN")} ₫</div>
+          <button onclick='addToCart(${JSON.stringify({
+            id: id,
+            name: ten,
+            price: gia,
+            image: anh
+          })})'>
+            Mua ngay
+          </button>
         </div>
       `;
     });
   })
   .catch(err => {
-    console.error("Lỗi fetch sheet:", err);
+    console.error(err);
     document.getElementById("products").innerHTML =
       "<p>Lỗi tải sản phẩm</p>";
   });
