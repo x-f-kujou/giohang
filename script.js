@@ -21,7 +21,15 @@ fetch(url)
           <img src="${anh}" alt="${ten}">
           <h3>${ten}</h3>
           <div class="price">${gia} ₫</div>
-          <a href="${link}" target="_blank">Mua ngay</a>
+          <button onclick='addToCart(${JSON.stringify({
+            id: ten,
+            name: ten,
+            price: gia,
+            image: anh
+          })})'>
+            Mua ngay
+          </button>
+
         </div>
       `;
     });
