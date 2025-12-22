@@ -122,14 +122,16 @@
 </div>
 
 <script>
+/* ================= CONFIG ================= */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznKBJmCDrE06137G1XV_wvB7aF5qy-58icz2ofFoB1b0V1x_Dm5Shz17H3wZ3CcOp0dA/exec";
+const ZALO_PHONE = "84358256608";
+/* ========================================= */
+
 const cartDiv = document.getElementById("cart");
 const totalDiv = document.getElementById("total");
 const customerDiv = document.getElementById("customer");
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznKBJmCDrE06137G1XV_wvB7aF5qy-58icz2ofFoB1b0V1x_Dm5Shz17H3wZ3CcOp0dA/exec"; // 🔴 DÁN URL APPS SCRIPT
-const ZALO_PHONE = "84358256608";            // 🔴 ĐỔI SỐ ZALO CỦA BẠN
 
 function formatPrice(n) {
   return Number(n).toLocaleString("vi-VN") + " ₫";
@@ -164,14 +166,14 @@ function renderCart() {
   let total = 0;
 
   cart.forEach((p, i) => {
-    total += p.gia * p.qty;
+    total += p.price * p.qty;
 
     cartDiv.innerHTML += `
       <div class="item">
-        <img src="${p.anh}">
+        <img src="${p.image}">
         <div class="item-info">
-          <strong>${p.ten}</strong><br>
-          ${formatPrice(p.gia)}
+          <strong>${p.name}</strong><br>
+          ${formatPrice(p.price)}
           <div class="qty">
             <button onclick="changeQty(${i}, -1)">-</button>
             <span>${p.qty}</span>
@@ -208,13 +210,13 @@ function sendOrder() {
 
   let total = 0;
   cart.forEach(p => {
-    total += p.gia * p.qty;
-    text += `- ${p.ten} x${p.qty}: ${formatPrice(p.gia * p.qty)}%0A`;
+    total += p.price * p.qty;
+    text += `- ${p.name} x${p.qty}: ${formatPrice(p.price * p.qty)}%0A`;
   });
 
   text += `%0ATỔNG: ${formatPrice(total)}`;
 
-  // ✅ GHI ĐƠN VỀ GOOGLE SHEET
+  // GHI GOOGLE SHEET
   fetch(SCRIPT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -222,13 +224,16 @@ function sendOrder() {
       name,
       phone,
       address,
-      products: cart.map(p => `${p.ten} x${p.qty}`).join(", "),
+      products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
       total
     })
   });
 
-  // ✅ MỞ ZALO
+  // MỞ ZALO
   window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
+
+  // XÓA GIỎ SAU KHI GỬI
+  localStorage.removeItem("cart");
 }
 
 renderCart();
