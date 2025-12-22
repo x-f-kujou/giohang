@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Giỏ hàng</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .item {
+      display: flex;
+      gap: 15px;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .qty button {
+      width: 28px;
+      height: 28px;
+    }
+
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 15px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+    }
+
+    button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .danger {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+    }
+
+    .primary {
+      background: #007bff;
+      color: #fff;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🛒 Giỏ hàng</h1>
+
+<div id="cart"></div>
+<div class="total" id="total"></div>
+
+<h3>Thông tin khách hàng</h3>
+<input id="name" placeholder="Họ tên">
+<input id="phone" placeholder="Số điện thoại">
+<textarea id="address" placeholder="Địa chỉ giao hàng"></textarea>
+
+<button class="primary" onclick="sendZalo()">📩 Gửi đơn qua Zalo</button>
+<button class="danger" onclick="clearCart()">🗑️ Xóa giỏ hàng</button>
+
+<script>
+const cartDiv = document.getElementById("cart");
+const totalDiv = document.getElementById("total");
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function formatPrice(n) {
+  return Number(n).toLocaleString("vi-VN") + " ₫";
+}
+
+function renderCart() {
+  cartDiv.innerHTML = "";
+
+  if (cart.length === 0) {
+    cartDiv.innerHTML = "<p>Giỏ hàng trống.</p>";
+    totalDiv.innerHTML = "";
+    return;
+  }
+
+  let total = 0;
+
+  cart.forEach((p, i) => {
+    total += p.gia * p.qty;
+
+    cartDiv.innerHTML += `
+      <div class="item">
+        <img src="${p.anh}">
+        <div class="item-info">
+          <strong>${p.ten}</strong><br>
+          ${formatPrice(p.gia)}
+          <div class="qty">
+            <button onclick="changeQty(${i}, -1)">-</button>
+            ${p.qty}
+            <button onclick="changeQty(${i}, 1)">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  totalDiv.innerHTML = "Tổng: " + formatPrice(total);
+}
+
+function changeQty(i, d) {
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  save();
+}
+
+function save() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCart();
+}
+
+function clearCart() {
+  if (!confirm("Xóa toàn bộ giỏ hàng?")) return;
+  localStorage.removeItem("cart");
+  cart = [];
+  renderCart();
+}
+
+function sendZalo() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const address = document.getElementById("address").value.trim();
+
+  if (!name || !phone || !address) {
+    alert("Vui lòng nhập đầy đủ thông tin");
+    return;
+  }
+
+  let text = `🛒 ĐƠN HÀNG%0A`;
+  text += `👤 ${name}%0A📞 ${phone}%0A🏠 ${address}%0A%0A`;
+
+  let total = 0;
+  cart.forEach(p => {
+    total += p.gia * p.qty;
+    text += `- ${p.ten} x${p.qty}: ${formatPrice(p.gia * p.qty)}%0A`;
+  });
+
+  text += `%0ATỔNG: ${formatPrice(total)}`;
+
+  const zaloPhone = "84358256608"; // 🔴 ĐỔI SỐ ZALO CỦA BẠN
+
+  window.open(`https://zalo.me/${zaloPhone}?text=${text}`, "_blank");
+}
+
+renderCart();
+</script>
+
+</body>
+</html>
