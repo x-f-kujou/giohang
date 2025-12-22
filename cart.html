@@ -6,20 +6,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{font-family:Arial;max-width:900px;margin:auto;padding:15px;background:#f5f5f5}
+body{
+  font-family:Arial,sans-serif;
+  max-width:900px;
+  margin:auto;
+  padding:15px;
+  background:#f5f5f5
+}
 h1{text-align:center}
-.item{display:flex;gap:12px;background:#fff;border-radius:10px;padding:10px;margin-bottom:10px}
-.item img{width:80px;height:80px;border-radius:8px;object-fit:cover}
-.item-info{flex:1}
-.qty button{width:28px;height:28px;border:none;border-radius:6px;background:#007bff;color:#fff}
+.item{
+  display:flex;
+  gap:12px;
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:10px;
+  align-items:center
+}
+.item img{
+  width:80px;
+  height:80px;
+  object-fit:cover;
+  border-radius:8px
+}
+.qty button{
+  width:28px;
+  height:28px;
+  border:none;
+  border-radius:6px;
+  background:#007bff;
+  color:#fff;
+  cursor:pointer
+}
 .qty span{margin:0 8px;font-weight:bold}
-.total{font-size:20px;font-weight:bold;text-align:right;margin:15px 0}
-input,textarea{width:100%;padding:8px;margin-top:8px;border-radius:6px;border:1px solid #ccc}
-button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:8px;font-size:16px}
+.total{
+  font-size:20px;
+  font-weight:bold;
+  text-align:right;
+  margin:15px 0
+}
+input,textarea{
+  width:100%;
+  padding:8px;
+  margin-top:8px;
+  border-radius:6px;
+  border:1px solid #ccc
+}
+button{
+  padding:12px;
+  margin-top:12px;
+  width:100%;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer
+}
 .primary{background:#28a745;color:#fff}
 .danger{background:#dc3545;color:#fff}
 .empty{text-align:center;background:#fff;padding:20px;border-radius:10px}
-label{display:block;margin-top:6px}
+#bank{text-align:center;margin-top:10px}
+#loading{
+  display:none;
+  text-align:center;
+  padding:15px;
+  font-weight:bold
+}
 </style>
 </head>
 
@@ -40,100 +91,127 @@ label{display:block;margin-top:6px}
   <label><input type="radio" name="payment" value="COD" checked> COD</label>
   <label><input type="radio" name="payment" value="CK"> Chuyển khoản</label>
 
-  <div id="bank" style="display:none;text-align:center;margin-top:10px">
+  <div id="bank">
     <img src="https://raw.githubusercontent.com/x-f-kujou/Image-host/main/Vietcombank%2050c407c7-4210-46a6-943d-7e73ed23ac88.jpg" width="260">
     <p><b>Vietcombank</b><br>STK: 1027122144<br>Tu Tu Phuong</p>
   </div>
 
+  <div id="loading">⏳ Đang gửi đơn hàng...</div>
+
   <button class="primary" onclick="sendOrder()">📩 Xác nhận đặt hàng</button>
-  <button class="danger" onclick="clearCart()">🗑️ Xóa giỏ hàng</button>
+  <button class="danger" onclick="clearCart()">🗑️ Xóa giỏ</button>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1KyYNwO4pSJyUdQ1pjnf9SUDkCqSmk13bh45PApkmoMKCaeYaEWr2b62uTFQ43HLv/exec";
-const ZALO_PHONE = "84358256608";
+/* ===== CONFIG ===== */
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbx1KyYNwO4pSJyUdQ1pjnf9SUDkCqSmk13bh45PApkmoMKCaeYaEWr2b62uTFQ43HLv/exec";
+const ZALO_PHONE="84358256608";
+/* ================== */
 
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-const cartDiv = document.getElementById("cart");
-const totalDiv = document.getElementById("total");
-const customerDiv = document.getElementById("customer");
+let cart=JSON.parse(localStorage.getItem("cart"))||[];
 
-function money(n){return n.toLocaleString("vi-VN")+" ₫"}
+const cartDiv=document.getElementById("cart");
+const totalDiv=document.getElementById("total");
+const customerDiv=document.getElementById("customer");
+const bankDiv=document.getElementById("bank");
+const loadingDiv=document.getElementById("loading");
 
-document.querySelectorAll("input[name=payment]").forEach(r=>{
-  r.addEventListener("change",()=>{
-    const val=document.querySelector("input[name=payment]:checked").value;
-    document.getElementById("bank").style.display=val==="CK"?"block":"none";
-  });
-});
+function format(n){return Number(n).toLocaleString("vi-VN")+" ₫"}
 
 function renderCart(){
-  if(!cart.length){
+  cartDiv.innerHTML="";
+  if(cart.length===0){
     cartDiv.innerHTML=`<div class="empty">Giỏ hàng trống</div>`;
-    totalDiv.innerHTML="";
     customerDiv.style.display="none";
+    totalDiv.innerHTML="";
     return;
   }
   let total=0;
-  cartDiv.innerHTML="";
   cart.forEach((p,i)=>{
     total+=p.price*p.qty;
     cartDiv.innerHTML+=`
-    <div class="item">
-      <img src="${p.image}">
-      <div class="item-info">
-        <b>${p.name}</b><br>${money(p.price)}
-        <div class="qty">
-          <button onclick="changeQty(${i},-1)">-</button>
-          <span>${p.qty}</span>
-          <button onclick="changeQty(${i},1)">+</button>
+      <div class="item">
+        <img src="${p.image}">
+        <div>
+          <b>${p.name}</b><br>${format(p.price)}
+          <div class="qty">
+            <button onclick="qty(${i},-1)">-</button>
+            <span>${p.qty}</span>
+            <button onclick="qty(${i},1)">+</button>
+          </div>
         </div>
-      </div>
-    </div>`;
+      </div>`;
   });
-  totalDiv.innerText="Tổng: "+money(total);
+  totalDiv.innerHTML="Tổng: "+format(total);
   customerDiv.style.display="block";
 }
 
-function changeQty(i,d){
+function qty(i,d){
   cart[i].qty+=d;
   if(cart[i].qty<=0) cart.splice(i,1);
   localStorage.setItem("cart",JSON.stringify(cart));
   renderCart();
 }
 
+document.querySelectorAll("input[name=payment]").forEach(r=>{
+  r.addEventListener("change",()=>{
+    bankDiv.style.display=
+      document.querySelector("input[name=payment]:checked").value==="CK"
+      ?"block":"none";
+  });
+});
+bankDiv.style.display="none";
+
+async function sendOrder(){
+  const name=nameInput.value.trim();
+  const phone=phoneInput.value.trim();
+  const address=addressInput.value.trim();
+  const payment=document.querySelector("input[name=payment]:checked").value;
+
+  if(!name||!phone||!address){
+    alert("Nhập đủ thông tin");
+    return;
+  }
+
+  loadingDiv.style.display="block";
+
+  const total=cart.reduce((s,p)=>s+p.price*p.qty,0);
+  const products=cart.map(p=>`${p.name} x${p.qty}`).join(" | ");
+  const status=payment==="CK"?"CHỜ THANH TOÁN":"CHƯA THANH TOÁN";
+
+  const url=`${SCRIPT_URL}?name=${encodeURIComponent(name)}&phone=${phone}&address=${encodeURIComponent(address)}&products=${encodeURIComponent(products)}&total=${total}&payment=${payment}&status=${encodeURIComponent(status)}`;
+
+  try{
+    const res=await fetch(url);
+    const txt=await res.text();
+    if(txt!=="OK") throw "Lỗi ghi Sheet";
+
+    let zalo=`🛒 ĐƠN HÀNG\n${name}\n${phone}\n${address}\n`;
+    cart.forEach(p=>zalo+=`- ${p.name} x${p.qty}\n`);
+    zalo+=`\nTổng: ${total.toLocaleString()} đ`;
+
+    window.open(`https://zalo.me/${ZALO_PHONE}?text=${encodeURIComponent(zalo)}`);
+    localStorage.removeItem("cart");
+    alert("✅ Đặt hàng thành công!");
+    location.reload();
+
+  }catch(e){
+    alert("❌ Gửi đơn thất bại, thử lại");
+    loadingDiv.style.display="none";
+  }
+}
+
 function clearCart(){
-  if(confirm("Xóa giỏ hàng?")){
+  if(confirm("Xóa giỏ?")){
     localStorage.removeItem("cart");
     cart=[];
     renderCart();
   }
 }
 
-async function sendOrder(){
-  const name=nameEl?.value||document.getElementById("name").value.trim();
-  const phone=document.getElementById("phone").value.trim();
-  const address=document.getElementById("address").value.trim();
-  const payment=document.querySelector("input[name=payment]:checked").value;
-
-  if(!name||!phone||!address){alert("Nhập đủ thông tin");return;}
-
-  const total=cart.reduce((s,p)=>s+p.price*p.qty,0);
-  const products=cart.map(p=>`${p.name} x${p.qty}`).join(" | ");
-  const status=payment==="CK"?"CHỜ THANH TOÁN":"CHƯA THANH TOÁN";
-
-  await fetch(`${SCRIPT_URL}?name=${encodeURIComponent(name)}&phone=${phone}&address=${encodeURIComponent(address)}&products=${encodeURIComponent(products)}&total=${total}&payment=${payment}&status=${status}`);
-
-  let msg=`🛒 ĐƠN HÀNG\n👤 ${name}\n📞 ${phone}\n🏠 ${address}\n💳 ${payment}\n\n`;
-  cart.forEach(p=>msg+=`- ${p.name} x${p.qty}\n`);
-  msg+=`\nTỔNG: ${money(total)}`;
-
-  window.open(`https://zalo.me/${ZALO_PHONE}?text=${encodeURIComponent(msg)}`,"_blank");
-
-  localStorage.removeItem("cart");
-  alert("✅ Đặt hàng thành công!");
-  location.reload();
-}
+const nameInput=document.getElementById("name");
+const phoneInput=document.getElementById("phone");
+const addressInput=document.getElementById("address");
 
 renderCart();
 </script>
