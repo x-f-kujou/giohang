@@ -3,218 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <title>Giỏ hàng</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body{
-  font-family:Arial,sans-serif;
-  max-width:900px;
-  margin:auto;
-  padding:15px;
-  background:#f5f5f5
+body {
+  font-family: Arial, sans-serif;
+  background: #f6f6f6;
+  margin: 0;
 }
-h1{text-align:center}
-.item{
-  display:flex;
-  gap:12px;
-  background:#fff;
-  border-radius:10px;
-  padding:10px;
-  margin-bottom:10px;
-  align-items:center
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
 }
-.item img{
-  width:80px;
-  height:80px;
-  object-fit:cover;
-  border-radius:8px
+.cart-item {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
 }
-.qty button{
-  width:28px;
-  height:28px;
-  border:none;
-  border-radius:6px;
-  background:#007bff;
-  color:#fff;
-  cursor:pointer
+.cart-item img {
+  width: 80px;
+  margin-right: 15px;
 }
-.qty span{margin:0 8px;font-weight:bold}
-.total{
-  font-size:20px;
-  font-weight:bold;
-  text-align:right;
-  margin:15px 0
+.cart-item h4 {
+  margin: 0;
 }
-input,textarea{
-  width:100%;
-  padding:8px;
-  margin-top:8px;
-  border-radius:6px;
-  border:1px solid #ccc
+.qty-btn {
+  padding: 5px 10px;
+  margin: 0 5px;
 }
-button{
-  padding:12px;
-  margin-top:12px;
-  width:100%;
-  font-size:16px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer
+.total {
+  font-size: 20px;
+  text-align: right;
+  margin-top: 15px;
+  color: red;
 }
-.primary{background:#28a745;color:#fff}
-.danger{background:#dc3545;color:#fff}
-.empty{text-align:center;background:#fff;padding:20px;border-radius:10px}
-#bank{text-align:center;margin-top:10px}
-#loading{
-  display:none;
-  text-align:center;
-  padding:15px;
-  font-weight:bold
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+button {
+  padding: 12px;
+  width: 100%;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+.payment-box {
+  margin: 10px 0;
+}
+.bank-info {
+  display: none;
+  border: 1px dashed #ccc;
+  padding: 15px;
+  margin-top: 10px;
+  text-align: center;
+}
+.bank-info img {
+  max-width: 220px;
 }
 </style>
 </head>
 
 <body>
+<div class="container">
+  <h2>🛒 Giỏ hàng</h2>
+  <div id="cart"></div>
+  <div class="total" id="total"></div>
 
-<h1>🛒 Giỏ hàng</h1>
-
-<div id="cart"></div>
-<div class="total" id="total"></div>
-
-<div id="customer" style="display:none">
   <h3>👤 Thông tin khách hàng</h3>
   <input id="name" placeholder="Họ tên">
   <input id="phone" placeholder="Số điện thoại">
-  <textarea id="address" placeholder="Địa chỉ giao hàng"></textarea>
+  <textarea id="address" placeholder="Địa chỉ"></textarea>
 
   <h3>💳 Hình thức thanh toán</h3>
-  <label><input type="radio" name="payment" value="COD" checked> COD</label>
-  <label><input type="radio" name="payment" value="CK"> Chuyển khoản</label>
-
-  <div id="bank">
-    <img src="https://raw.githubusercontent.com/x-f-kujou/Image-host/main/Vietcombank%2050c407c7-4210-46a6-943d-7e73ed23ac88.jpg" width="260">
-    <p><b>Vietcombank</b><br>STK: 1027122144<br>Tu Tu Phuong</p>
+  <div class="payment-box">
+    <label>
+      <input type="radio" name="payment" value="COD" checked onclick="toggleBank(false)">
+      COD
+    </label><br>
+    <label>
+      <input type="radio" name="payment" value="CK" onclick="toggleBank(true)">
+      Chuyển khoản
+    </label>
   </div>
 
-  <div id="loading">⏳ Đang gửi đơn hàng...</div>
+  <!-- THÔNG TIN CHUYỂN KHOẢN -->
+  <div class="bank-info" id="bankInfo">
+    <img src="https://i.imgur.com/6QJ6b3O.png" alt="QR CK"><br>
+    <b>Vietcombank</b><br>
+    STK: <b>1027122144</b><br>
+    Chủ TK: <b>Từ Tú Phương</b><br>
+    <small>Nội dung: Tên + SĐT</small>
+  </div>
 
-  <button class="primary" onclick="sendOrder()">📩 Xác nhận đặt hàng</button>
-  <button class="danger" onclick="clearCart()">🗑️ Xóa giỏ</button>
+  <button onclick="sendOrder()">✅ Xác nhận đặt hàng</button>
 </div>
 
 <script>
-/* ===== CONFIG ===== */
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbx1KyYNwO4pSJyUdQ1pjnf9SUDkCqSmk13bh45PApkmoMKCaeYaEWr2b62uTFQ43HLv/exec";
-const ZALO_PHONE="84358256608";
-/* ================== */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgI6E4onLA7FNA1VCGXnxOmjyllLGPT2uwdV6DbDJcMZrkn83pRDlugkNE5Gy6Bpvv/exec";
 
-let cart=JSON.parse(localStorage.getItem("cart"))||[];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-const cartDiv=document.getElementById("cart");
-const totalDiv=document.getElementById("total");
-const customerDiv=document.getElementById("customer");
-const bankDiv=document.getElementById("bank");
-const loadingDiv=document.getElementById("loading");
+function renderCart() {
+  const cartDiv = document.getElementById("cart");
+  cartDiv.innerHTML = "";
+  let total = 0;
 
-function format(n){return Number(n).toLocaleString("vi-VN")+" ₫"}
-
-function renderCart(){
-  cartDiv.innerHTML="";
-  if(cart.length===0){
-    cartDiv.innerHTML=`<div class="empty">Giỏ hàng trống</div>`;
-    customerDiv.style.display="none";
-    totalDiv.innerHTML="";
-    return;
-  }
-  let total=0;
-  cart.forEach((p,i)=>{
-    total+=p.price*p.qty;
-    cartDiv.innerHTML+=`
-      <div class="item">
+  cart.forEach((p, i) => {
+    total += p.price * p.qty;
+    cartDiv.innerHTML += `
+      <div class="cart-item">
         <img src="${p.image}">
         <div>
-          <b>${p.name}</b><br>${format(p.price)}
-          <div class="qty">
-            <button onclick="qty(${i},-1)">-</button>
-            <span>${p.qty}</span>
-            <button onclick="qty(${i},1)">+</button>
-          </div>
+          <h4>${p.name}</h4>
+          <p>${p.price.toLocaleString()} đ</p>
+          <button class="qty-btn" onclick="changeQty(${i},-1)">-</button>
+          ${p.qty}
+          <button class="qty-btn" onclick="changeQty(${i},1)">+</button>
         </div>
       </div>`;
   });
-  totalDiv.innerHTML="Tổng: "+format(total);
-  customerDiv.style.display="block";
+
+  document.getElementById("total").innerText =
+    "Tổng: " + total.toLocaleString() + " đ";
 }
 
-function qty(i,d){
-  cart[i].qty+=d;
-  if(cart[i].qty<=0) cart.splice(i,1);
-  localStorage.setItem("cart",JSON.stringify(cart));
+function changeQty(i, d) {
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  localStorage.setItem("cart", JSON.stringify(cart));
   renderCart();
 }
 
-document.querySelectorAll("input[name=payment]").forEach(r=>{
-  r.addEventListener("change",()=>{
-    bankDiv.style.display=
-      document.querySelector("input[name=payment]:checked").value==="CK"
-      ?"block":"none";
-  });
-});
-bankDiv.style.display="none";
+function toggleBank(show) {
+  document.getElementById("bankInfo").style.display = show ? "block" : "none";
+}
 
-async function sendOrder(){
-  const name=nameInput.value.trim();
-  const phone=phoneInput.value.trim();
-  const address=addressInput.value.trim();
-  const payment=document.querySelector("input[name=payment]:checked").value;
+function sendOrder() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const payment = document.querySelector("input[name=payment]:checked").value;
 
-  if(!name||!phone||!address){
-    alert("Nhập đủ thông tin");
+  if (!name || !phone || !address) {
+    alert("Vui lòng nhập đầy đủ thông tin");
     return;
   }
 
-  loadingDiv.style.display="block";
-
-  const total=cart.reduce((s,p)=>s+p.price*p.qty,0);
-  const products=cart.map(p=>`${p.name} x${p.qty}`).join(" | ");
-  const status=payment==="CK"?"CHỜ THANH TOÁN":"CHƯA THANH TOÁN";
-
-  const url=`${SCRIPT_URL}?name=${encodeURIComponent(name)}&phone=${phone}&address=${encodeURIComponent(address)}&products=${encodeURIComponent(products)}&total=${total}&payment=${payment}&status=${encodeURIComponent(status)}`;
-
-  try{
-    const res=await fetch(url);
-    const txt=await res.text();
-    if(txt!=="OK") throw "Lỗi ghi Sheet";
-
-    let zalo=`🛒 ĐƠN HÀNG\n${name}\n${phone}\n${address}\n`;
-    cart.forEach(p=>zalo+=`- ${p.name} x${p.qty}\n`);
-    zalo+=`\nTổng: ${total.toLocaleString()} đ`;
-
-    window.open(`https://zalo.me/${ZALO_PHONE}?text=${encodeURIComponent(zalo)}`);
-    localStorage.removeItem("cart");
-    alert("✅ Đặt hàng thành công!");
-    location.reload();
-
-  }catch(e){
-    alert("❌ Gửi đơn thất bại, thử lại");
-    loadingDiv.style.display="none";
+  if (cart.length === 0) {
+    alert("Giỏ hàng trống");
+    return;
   }
-}
 
-function clearCart(){
-  if(confirm("Xóa giỏ?")){
-    localStorage.removeItem("cart");
-    cart=[];
-    renderCart();
-  }
-}
+  const total = cart.reduce((s,p)=>s+p.price*p.qty,0);
+  const products = cart.map(p=>`${p.name} x${p.qty}`).join(" | ");
+  const status = payment === "CK" ? "CHỜ THANH TOÁN" : "CHƯA THANH TOÁN";
 
-const nameInput=document.getElementById("name");
-const phoneInput=document.getElementById("phone");
-const addressInput=document.getElementById("address");
+  const url =
+    `${SCRIPT_URL}?name=${encodeURIComponent(name)}` +
+    `&phone=${encodeURIComponent(phone)}` +
+    `&address=${encodeURIComponent(address)}` +
+    `&products=${encodeURIComponent(products)}` +
+    `&total=${total}` +
+    `&payment=${payment}` +
+    `&status=${status}`;
+
+  fetch(url)
+    .then(r=>r.text())
+    .then(t=>{
+      if(t.trim()!=="OK"){
+        alert("❌ Gửi đơn thất bại");
+        return;
+      }
+      alert("✅ Đã gửi đơn thành công!\nVui lòng hoàn tất thanh toán nếu chuyển khoản.");
+
+      // ❗ KHÔNG XÓA GIỎ HÀNG
+      // localStorage.removeItem("cart");
+    });
+}
 
 renderCart();
 </script>
-
 </body>
 </html>
