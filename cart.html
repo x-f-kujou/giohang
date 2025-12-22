@@ -4,30 +4,36 @@
   <meta charset="UTF-8">
   <title>Giỏ hàng</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       font-family: Arial, sans-serif;
       max-width: 900px;
-      margin: 20px auto;
-      padding: 10px;
+      margin: auto;
+      padding: 15px;
+      background: #f5f5f5;
     }
 
     h1 {
       text-align: center;
+      margin-bottom: 20px;
     }
 
     .item {
       display: flex;
-      gap: 15px;
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
+      gap: 12px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      align-items: center;
     }
 
     .item img {
       width: 80px;
       height: 80px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 8px;
     }
 
     .item-info {
@@ -37,42 +43,67 @@
     .qty button {
       width: 28px;
       height: 28px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .qty span {
+      margin: 0 8px;
+      font-weight: bold;
     }
 
     .total {
       font-size: 20px;
       font-weight: bold;
       text-align: right;
-      margin-top: 15px;
+      margin: 15px 0;
     }
 
     input, textarea {
       width: 100%;
       padding: 8px;
       margin-top: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
 
-    button {
-      padding: 10px;
-      margin-top: 10px;
+    button.action {
+      padding: 12px;
+      margin-top: 12px;
       width: 100%;
       font-size: 16px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
     }
 
-    .danger {
-      background: #e74c3c;
+    .primary {
+      background: #28a745;
       color: #fff;
-      border: none;
     }
 
-    .primary {
-      background: #007bff;
+    .danger {
+      background: #dc3545;
       color: #fff;
-      border: none;
+    }
+
+    .empty {
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007bff;
     }
   </style>
 </head>
+
 <body>
 
 <h1>🛒 Giỏ hàng</h1>
@@ -80,30 +111,53 @@
 <div id="cart"></div>
 <div class="total" id="total"></div>
 
-<h3>Thông tin khách hàng</h3>
-<input id="name" placeholder="Họ tên">
-<input id="phone" placeholder="Số điện thoại">
-<textarea id="address" placeholder="Địa chỉ giao hàng"></textarea>
+<div id="customer" style="display:none">
+  <h3>Thông tin khách hàng</h3>
+  <input id="name" placeholder="Họ tên">
+  <input id="phone" placeholder="Số điện thoại">
+  <textarea id="address" placeholder="Địa chỉ giao hàng"></textarea>
 
-<button class="primary" onclick="sendZalo()">📩 Gửi đơn qua Zalo</button>
-<button class="danger" onclick="clearCart()">🗑️ Xóa giỏ hàng</button>
+  <button class="action primary" onclick="sendOrder()">📩 Gửi đơn qua Zalo</button>
+  <button class="action danger" onclick="clearCart()">🗑️ Xóa giỏ hàng</button>
+</div>
 
 <script>
 const cartDiv = document.getElementById("cart");
 const totalDiv = document.getElementById("total");
+const customerDiv = document.getElementById("customer");
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznKBJmCDrE06137G1XV_wvB7aF5qy-58icz2ofFoB1b0V1x_Dm5Shz17H3wZ3CcOp0dA/exec"; // 🔴 DÁN URL APPS SCRIPT
+const ZALO_PHONE = "84358256608";            // 🔴 ĐỔI SỐ ZALO CỦA BẠN
+
 function formatPrice(n) {
   return Number(n).toLocaleString("vi-VN") + " ₫";
+}
+
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCart();
+}
+
+function changeQty(i, d) {
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart();
 }
 
 function renderCart() {
   cartDiv.innerHTML = "";
 
   if (cart.length === 0) {
-    cartDiv.innerHTML = "<p>Giỏ hàng trống.</p>";
+    cartDiv.innerHTML = `
+      <div class="empty">
+        <p>Giỏ hàng đang trống 🛒</p>
+        <a href="index.html">← Quay lại mua sắm</a>
+      </div>
+    `;
     totalDiv.innerHTML = "";
+    customerDiv.style.display = "none";
     return;
   }
 
@@ -120,7 +174,7 @@ function renderCart() {
           ${formatPrice(p.gia)}
           <div class="qty">
             <button onclick="changeQty(${i}, -1)">-</button>
-            ${p.qty}
+            <span>${p.qty}</span>
             <button onclick="changeQty(${i}, 1)">+</button>
           </div>
         </div>
@@ -129,17 +183,7 @@ function renderCart() {
   });
 
   totalDiv.innerHTML = "Tổng: " + formatPrice(total);
-}
-
-function changeQty(i, d) {
-  cart[i].qty += d;
-  if (cart[i].qty <= 0) cart.splice(i, 1);
-  save();
-}
-
-function save() {
-  localStorage.setItem("cart", JSON.stringify(cart));
-  renderCart();
+  customerDiv.style.display = "block";
 }
 
 function clearCart() {
@@ -149,7 +193,7 @@ function clearCart() {
   renderCart();
 }
 
-function sendZalo() {
+function sendOrder() {
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const address = document.getElementById("address").value.trim();
@@ -170,9 +214,21 @@ function sendZalo() {
 
   text += `%0ATỔNG: ${formatPrice(total)}`;
 
-  const zaloPhone = "84358256608"; // 🔴 ĐỔI SỐ ZALO CỦA BẠN
+  // ✅ GHI ĐƠN VỀ GOOGLE SHEET
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name,
+      phone,
+      address,
+      products: cart.map(p => `${p.ten} x${p.qty}`).join(", "),
+      total
+    })
+  });
 
-  window.open(`https://zalo.me/${zaloPhone}?text=${text}`, "_blank");
+  // ✅ MỞ ZALO
+  window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
 }
 
 renderCart();
