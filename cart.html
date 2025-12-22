@@ -122,10 +122,10 @@
 </div>
 
 <script>
-/* ================= CONFIG ================= */
+/* ========= CONFIG ========= */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznKBJmCDrE06137G1XV_wvB7aF5qy-58icz2ofFoB1b0V1x_Dm5Shz17H3wZ3CcOp0dA/exec";
 const ZALO_PHONE = "84358256608";
-/* ========================================= */
+/* ========================== */
 
 const cartDiv = document.getElementById("cart");
 const totalDiv = document.getElementById("total");
@@ -216,35 +216,31 @@ function sendOrder() {
 
   text += `%0ATỔNG: ${formatPrice(total)}`;
 
-  // GHI GOOGLE SHEET
   fetch(SCRIPT_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    name,
-    phone,
-    address,
-    products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
-    total
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name,
+      phone,
+      address,
+      products: cart.map(p => `${p.name} x${p.qty}`).join(", "),
+      total
+    })
   })
-})
-.then(res => res.text())
-.then(res => {
-  if (res !== "OK") {
-    alert("Lỗi ghi đơn: " + res);
-    return;
-  }
+  .then(res => res.text())
+  .then(res => {
+    if (res !== "OK") {
+      alert("Lỗi ghi đơn: " + res);
+      return;
+    }
 
-  window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
-  localStorage.removeItem("cart");
-});
-
-
-  // MỞ ZALO
-  window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
-
-  // XÓA GIỎ SAU KHI GỬI
-  localStorage.removeItem("cart");
+    window.open(`https://zalo.me/${ZALO_PHONE}?text=${text}`, "_blank");
+    localStorage.removeItem("cart");
+  })
+  .catch(err => {
+    alert("Không gửi được đơn");
+    console.error(err);
+  });
 }
 
 renderCart();
