@@ -1,107 +1,26 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Giỏ hàng</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Giỏ hàng</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: auto;
-      padding: 15px;
-      background: #f5f5f5;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .item {
-      display: flex;
-      gap: 12px;
-      background: #fff;
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 10px;
-      align-items: center;
-    }
-
-    .item img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .item-info {
-      flex: 1;
-    }
-
-    .qty button {
-      width: 28px;
-      height: 28px;
-      border: none;
-      border-radius: 6px;
-      background: #007bff;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    .qty span {
-      margin: 0 8px;
-      font-weight: bold;
-    }
-
-    .total {
-      font-size: 20px;
-      font-weight: bold;
-      text-align: right;
-      margin: 15px 0;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    button.action {
-      padding: 12px;
-      margin-top: 12px;
-      width: 100%;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: #28a745;
-      color: #fff;
-    }
-
-    .danger {
-      background: #dc3545;
-      color: #fff;
-    }
-
-    .empty {
-      text-align: center;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-    }
-
-    label {
-      display: block;
-      margin-top: 6px;
-    }
-  </style>
+<style>
+body{font-family:Arial;max-width:900px;margin:auto;padding:15px;background:#f5f5f5}
+h1{text-align:center}
+.item{display:flex;gap:12px;background:#fff;border-radius:10px;padding:10px;margin-bottom:10px}
+.item img{width:80px;height:80px;border-radius:8px;object-fit:cover}
+.item-info{flex:1}
+.qty button{width:28px;height:28px;border:none;border-radius:6px;background:#007bff;color:#fff}
+.qty span{margin:0 8px;font-weight:bold}
+.total{font-size:20px;font-weight:bold;text-align:right;margin:15px 0}
+input,textarea{width:100%;padding:8px;margin-top:8px;border-radius:6px;border:1px solid #ccc}
+button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:8px;font-size:16px}
+.primary{background:#28a745;color:#fff}
+.danger{background:#dc3545;color:#fff}
+.empty{text-align:center;background:#fff;padding:20px;border-radius:10px}
+label{display:block;margin-top:6px}
+</style>
 </head>
 
 <body>
@@ -118,155 +37,98 @@
   <textarea id="address" placeholder="Địa chỉ giao hàng"></textarea>
 
   <h3>💳 Hình thức thanh toán</h3>
-  <label>
-    <input type="radio" name="payment" value="COD" checked>
-    Thanh toán khi nhận hàng (COD)
-  </label>
-  <label>
-    <input type="radio" name="payment" value="CK">
-    Chuyển khoản ngân hàng
-  </label>
+  <label><input type="radio" name="payment" value="COD" checked> COD</label>
+  <label><input type="radio" name="payment" value="CK"> Chuyển khoản</label>
 
-  <div id="bank" style="display:none;margin-top:10px;text-align:center">
-    <img
-  src="https://raw.githubusercontent.com/x-f-kujou/Image-host/main/Vietcombank%2050c407c7-4210-46a6-943d-7e73ed23ac88.jpg"
-  width="260"
-    >
-
-    <p>
-      <b>Ngân hàng:</b> Vietcombank<br>
-      <b>STK:</b> 1027122144<br>
-      <b>Tên:</b> Tu Tu Phuong
-    </p>
+  <div id="bank" style="display:none;text-align:center;margin-top:10px">
+    <img src="https://raw.githubusercontent.com/x-f-kujou/Image-host/main/Vietcombank%2050c407c7-4210-46a6-943d-7e73ed23ac88.jpg" width="260">
+    <p><b>Vietcombank</b><br>STK: 1027122144<br>Tu Tu Phuong</p>
   </div>
 
-  <button class="action primary" onclick="sendOrder()">📩 Xác nhận đặt hàng</button>
-  <button class="action danger" onclick="clearCart()">🗑️ Xóa giỏ hàng</button>
+  <button class="primary" onclick="sendOrder()">📩 Xác nhận đặt hàng</button>
+  <button class="danger" onclick="clearCart()">🗑️ Xóa giỏ hàng</button>
 </div>
 
 <script>
-/* ========= CONFIG ========= */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1KyYNwO4pSJyUdQ1pjnf9SUDkCqSmk13bh45PApkmoMKCaeYaEWr2b62uTFQ43HLv/exec";
 const ZALO_PHONE = "84358256608";
-/* ========================== */
 
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 const cartDiv = document.getElementById("cart");
 const totalDiv = document.getElementById("total");
 const customerDiv = document.getElementById("customer");
 
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+function money(n){return n.toLocaleString("vi-VN")+" ₫"}
 
-function formatPrice(n) {
-  return Number(n).toLocaleString("vi-VN") + " ₫";
-}
-
-function saveCart() {
-  localStorage.setItem("cart", JSON.stringify(cart));
-  renderCart();
-}
-
-function changeQty(i, d) {
-  cart[i].qty += d;
-  if (cart[i].qty <= 0) cart.splice(i, 1);
-  saveCart();
-}
-
-function renderCart() {
-  cartDiv.innerHTML = "";
-
-  if (cart.length === 0) {
-    cartDiv.innerHTML = `
-      <div class="empty">
-        <p>Giỏ hàng đang trống 🛒</p>
-        <a href="index.html">← Quay lại mua sắm</a>
-      </div>
-    `;
-    totalDiv.innerHTML = "";
-    customerDiv.style.display = "none";
-    return;
-  }
-
-  let total = 0;
-
-  cart.forEach((p, i) => {
-    total += p.price * p.qty;
-
-    cartDiv.innerHTML += `
-      <div class="item">
-        <img src="${p.image}">
-        <div class="item-info">
-          <strong>${p.name}</strong><br>
-          ${formatPrice(p.price)}
-          <div class="qty">
-            <button onclick="changeQty(${i}, -1)">-</button>
-            <span>${p.qty}</span>
-            <button onclick="changeQty(${i}, 1)">+</button>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-
-  totalDiv.innerHTML = "Tổng: " + formatPrice(total);
-  customerDiv.style.display = "block";
-}
-
-/* Hiện QR khi chọn CK */
-document.querySelectorAll("input[name=payment]").forEach(el => {
-  el.addEventListener("change", () => {
-    document.getElementById("bank").style.display =
-      el.value === "CK" ? "block" : "none";
+document.querySelectorAll("input[name=payment]").forEach(r=>{
+  r.addEventListener("change",()=>{
+    const val=document.querySelector("input[name=payment]:checked").value;
+    document.getElementById("bank").style.display=val==="CK"?"block":"none";
   });
 });
 
-function clearCart() {
-  if (!confirm("Xóa toàn bộ giỏ hàng?")) return;
-  localStorage.removeItem("cart");
-  cart = [];
+function renderCart(){
+  if(!cart.length){
+    cartDiv.innerHTML=`<div class="empty">Giỏ hàng trống</div>`;
+    totalDiv.innerHTML="";
+    customerDiv.style.display="none";
+    return;
+  }
+  let total=0;
+  cartDiv.innerHTML="";
+  cart.forEach((p,i)=>{
+    total+=p.price*p.qty;
+    cartDiv.innerHTML+=`
+    <div class="item">
+      <img src="${p.image}">
+      <div class="item-info">
+        <b>${p.name}</b><br>${money(p.price)}
+        <div class="qty">
+          <button onclick="changeQty(${i},-1)">-</button>
+          <span>${p.qty}</span>
+          <button onclick="changeQty(${i},1)">+</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  totalDiv.innerText="Tổng: "+money(total);
+  customerDiv.style.display="block";
+}
+
+function changeQty(i,d){
+  cart[i].qty+=d;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  localStorage.setItem("cart",JSON.stringify(cart));
   renderCart();
 }
 
-function sendOrder() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
-  const payment = document.querySelector("input[name=payment]:checked").value;
-
-  if (!name || !phone || !address) {
-    alert("Vui lòng nhập đầy đủ thông tin");
-    return;
+function clearCart(){
+  if(confirm("Xóa giỏ hàng?")){
+    localStorage.removeItem("cart");
+    cart=[];
+    renderCart();
   }
+}
 
-  const total = cart.reduce((s, p) => s + p.price * p.qty, 0);
-  const products = cart.map(p => `${p.name} x${p.qty}`).join(" | ");
+async function sendOrder(){
+  const name=nameEl?.value||document.getElementById("name").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+  const address=document.getElementById("address").value.trim();
+  const payment=document.querySelector("input[name=payment]:checked").value;
 
-  const status = payment === "CK" ? "CHỜ THANH TOÁN" : "CHƯA THANH TOÁN";
+  if(!name||!phone||!address){alert("Nhập đủ thông tin");return;}
 
-  const url =
-    `${SCRIPT_URL}?name=${encodeURIComponent(name)}` +
-    `&phone=${encodeURIComponent(phone)}` +
-    `&address=${encodeURIComponent(address)}` +
-    `&products=${encodeURIComponent(products)}` +
-    `&total=${total}` +
-    `&payment=${payment}` +
-    `&status=${status}`;
+  const total=cart.reduce((s,p)=>s+p.price*p.qty,0);
+  const products=cart.map(p=>`${p.name} x${p.qty}`).join(" | ");
+  const status=payment==="CK"?"CHỜ THANH TOÁN":"CHƯA THANH TOÁN";
 
-  fetch(url);
+  await fetch(`${SCRIPT_URL}?name=${encodeURIComponent(name)}&phone=${phone}&address=${encodeURIComponent(address)}&products=${encodeURIComponent(products)}&total=${total}&payment=${payment}&status=${status}`);
 
-  let text = `🛒 ĐƠN HÀNG\n`;
-  text += `👤 ${name}\n📞 ${phone}\n🏠 ${address}\n`;
-  text += `💳 Thanh toán: ${payment}\n\n`;
+  let msg=`🛒 ĐƠN HÀNG\n👤 ${name}\n📞 ${phone}\n🏠 ${address}\n💳 ${payment}\n\n`;
+  cart.forEach(p=>msg+=`- ${p.name} x${p.qty}\n`);
+  msg+=`\nTỔNG: ${money(total)}`;
 
-  cart.forEach(p => {
-    text += `- ${p.name} x${p.qty}: ${(p.price*p.qty).toLocaleString()} đ\n`;
-  });
-
-  text += `\nTỔNG: ${total.toLocaleString()} đ`;
-
-  window.open(
-    `https://zalo.me/${ZALO_PHONE}?text=${encodeURIComponent(text)}`,
-    "_blank"
-  );
+  window.open(`https://zalo.me/${ZALO_PHONE}?text=${encodeURIComponent(msg)}`,"_blank");
 
   localStorage.removeItem("cart");
   alert("✅ Đặt hàng thành công!");
