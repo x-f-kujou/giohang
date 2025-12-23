@@ -5,8 +5,10 @@
   <title>Sản phẩm</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- defer để đảm bảo JS chạy sau khi HTML load -->
+  <script src="script.js" defer></script>
 </head>
 
 <body>
@@ -14,11 +16,8 @@
 <h2>Danh sách sản phẩm</h2>
 
 <div id="products" class="product-grid">
-  <!-- Sản phẩm sẽ được JS đổ vào đây -->
+  <!-- JS sẽ render sản phẩm ở đây -->
 </div>
-
-<!-- JS PHẢI để CUỐI BODY -->
-<script src="script.js"></script>
 
 </body>
 </html>
