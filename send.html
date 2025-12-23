@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Gửi đơn hàng</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<h2>✅ Đang gửi đơn hàng…</h2>
+<p>Vui lòng chờ trong giây lát</p>
+
+<script>
+// LINK GOOGLE FORM CỦA BẠN
+const FORM_URL =
+"https://docs.google.com/forms/d/e/1FAIpQLSc8Ts9qc4T-TRYX7my_6ryTBAis3bEU-yhrONjsZss1s15rIg/viewform?usp=pp_url";
+
+// MAP ENTRY ID (ĐÚNG LINK BẠN ĐÃ GỬI)
+const ENTRY = {
+  name: "entry.1313927642",
+  phone: "entry.1798347891",
+  address: "entry.428704529",
+  products: "entry.131920185",
+  total: "entry.1824592539",
+  note: "entry.1497400442"
+};
+
+const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+const customer = JSON.parse(localStorage.getItem("customer") || "{}");
+
+if (!cart.length || !customer.name) {
+  alert("Thiếu thông tin đơn hàng");
+  location.href = "index.html";
+}
+
+const products = cart
+  .map(p => `${p.name} (x${p.qty})`)
+  .join(", ");
+
+const total = cart.reduce(
+  (sum, p) => sum + p.price * p.qty, 0
+);
+
+const url =
+  FORM_URL +
+  "&" + ENTRY.name + "=" + encodeURIComponent(customer.name) +
+  "&" + ENTRY.phone + "=" + encodeURIComponent(customer.phone) +
+  "&" + ENTRY.address + "=" + encodeURIComponent(customer.address) +
+  "&" + ENTRY.products + "=" + encodeURIComponent(products) +
+  "&" + ENTRY.total + "=" + encodeURIComponent(total);
+
+// Xóa giỏ hàng sau khi gửi
+localStorage.removeItem("cart");
+
+// Chuyển sang Google Form
+window.location.href = url;
+</script>
+
+</body>
+</html>
