@@ -34,6 +34,39 @@
 <input id="phone" placeholder="Số điện thoại đã đặt hàng">
 <input id="note" placeholder="Ghi chú (VD: CK lúc 10h)">
 
+<button onclick="sendConfirm()">Gửi xác nhận</button>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/XXXXXXXX/exec";
+
+function sendConfirm() {
+  const phone = document.getElementById("phone").value.trim();
+  const note = document.getElementById("note").value.trim();
+
+  if (!phone) {
+    alert("Vui lòng nhập số điện thoại");
+    return;
+  }
+
+  const url =
+    SCRIPT_URL +
+    "?action=confirm" +
+    "&phone=" + encodeURIComponent(phone) +
+    "&note=" + encodeURIComponent(note);
+
+  fetch(url)
+    .then(() => {
+      alert("✅ Đã gửi xác nhận, shop sẽ kiểm tra!");
+      window.location.href = "index.html";
+    })
+    .catch(() => {
+      alert("❌ Không gửi được, vui lòng thử lại");
+    });
+}
+</script>
+
+</body>
+</html>
 <button onclick="confirm()">Gửi xác nhận</button>
 
 <script>
