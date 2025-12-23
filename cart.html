@@ -1,39 +1,46 @@
-<form id="orderForm" action="https://docs.google.com/forms/d/19Xt8NNu1OuJod_dj4NN4uQlwVpoXcvTxrCx-T_01uRo/formResponse" method="POST" target="_self">
-  <!-- Ô nhập dữ liệu hiển thị cho người dùng -->
-  <label>Tên khách hàng:
-    <input type="text" id="customerName" name="entry.7182938401" required>
-  </label><br>
-  <label>Số điện thoại:
-    <input type="text" id="phoneNumber" name="entry.9371826540" required>
-  </label><br>
-  <!-- Ô ẩn để chứa dữ liệu sản phẩm và tổng tiền -->
+<form
+  id="orderForm"
+  action="https://docs.google.com/forms/d/19Xt8NNu1OuJod_dj4NN4uQlwVpoXcvTxrCx-T_01uRo/formResponse"
+  method="POST"
+  target="_self"
+>
+  <label>
+    Tên khách hàng:
+    <input type="text" name="entry.7182938401" required>
+  </label><br><br>
+
+  <label>
+    Số điện thoại:
+    <input type="text" name="entry.9371826540" required>
+  </label><br><br>
+
+  <!-- hidden -->
   <input type="hidden" id="productList" name="entry.4123789056">
   <input type="hidden" id="totalAmount" name="entry.6685492037">
+
   <button type="submit">Gửi đơn hàng</button>
 </form>
 
 <script>
-// Giả sử giỏ hàng lưu trong localStorage dưới key 'cart' (dạng JSON string)
-let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  // ====== LẤY GIỎ HÀNG ======
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-// Tạo chuỗi danh sách sản phẩm và tính tổng
-let productNames = [];
-let total = 0;
-cart.forEach(item => {
-  productNames.push(item.name + " (x" + item.quantity + ")");
-  total += item.price * item.quantity;
-});
+  let productNames = [];
+  let total = 0;
 
-// Điền dữ liệu vào form trước khi submit
-document.getElementById("productList").value = productNames.join(", ");
-document.getElementById("totalAmount").value = total;
+  cart.forEach(item => {
+    productNames.push(`${item.name} (x${item.qty})`);
+    total += item.price * item.qty;
+  });
+
+  document.getElementById("productList").value = productNames.join(", ");
+  document.getElementById("totalAmount").value = total;
+
+  // ====== SAU KHI SUBMIT → XÓA GIỎ ======
+  document.getElementById("orderForm").addEventListener("submit", () => {
+    localStorage.removeItem("cart");
+  });
 </script>
-  cart[i].qty += d;
-  if (cart[i].qty <= 0) cart.splice(i, 1);
-  saveCart(cart);
-}
-
-function removeItem(i) {
   const cart = getCart();
   cart.splice(i, 1);
   saveCart(cart);
