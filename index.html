@@ -1,30 +1,18 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Danh sách sản phẩm</title>
+  <meta charset="UTF-8">
+  <title>Sản phẩm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>Danh sách sản phẩm</h1>
-<div id="products" class="grid"></div>
+<h2>Danh sách sản phẩm</h2>
+
+<div id="products" class="product-grid"></div>
 
 <script src="script.js"></script>
-</body>
-</html>
-
-  if (found) {
-    found.qty += 1;
-  } else {
-    cart.push({ ...product, qty: 1 });
-  }
-
-  localStorage.setItem("cart", JSON.stringify(cart));
-
-  window.location.href = "cart.html";
-}
-</script>
-
 </body>
 </html>
