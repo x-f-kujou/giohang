@@ -7,23 +7,18 @@
 </head>
 
 <body>
-
-<h2>✅ Đang gửi đơn hàng…</h2>
-<p>Vui lòng chờ trong giây lát</p>
+<h3>⏳ Đang gửi đơn hàng…</h3>
 
 <script>
-// LINK GOOGLE FORM CỦA BẠN
 const FORM_URL =
-"https://docs.google.com/forms/d/e/1FAIpQLSc8Ts9qc4T-TRYX7my_6ryTBAis3bEU-yhrONjsZss1s15rIg/viewform?usp=pp_url";
+"https://docs.google.com/forms/d/e/1FAIpQLSc8Ts9qc4T-TRYX7my_6ryTBAis3bEU-yhrONjsZss1s15rIg/formResponse";
 
-// MAP ENTRY ID (ĐÚNG LINK BẠN ĐÃ GỬI)
 const ENTRY = {
   name: "entry.1313927642",
   phone: "entry.1798347891",
   address: "entry.428704529",
   products: "entry.131920185",
-  total: "entry.1824592539",
-  note: "entry.1497400442"
+  total: "entry.1824592539"
 };
 
 const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -34,27 +29,40 @@ if (!cart.length || !customer.name) {
   location.href = "index.html";
 }
 
-const products = cart
-  .map(p => `${p.name} (x${p.qty})`)
-  .join(", ");
+// 👉 FORMAT SẢN PHẨM CHUẨN GOOGLE FORM
+let productText = "";
+let total = 0;
 
-const total = cart.reduce(
-  (sum, p) => sum + p.price * p.qty, 0
-);
+cart.forEach((p, i) => {
+  productText += `${i + 1}. ${p.name} x${p.qty} = ${(p.price * p.qty).toLocaleString("vi-VN")} ₫\n`;
+  total += p.price * p.qty;
+});
 
-const url =
-  FORM_URL +
-  "&" + ENTRY.name + "=" + encodeURIComponent(customer.name) +
+const params =
+  ENTRY.name + "=" + encodeURIComponent(customer.name) +
   "&" + ENTRY.phone + "=" + encodeURIComponent(customer.phone) +
   "&" + ENTRY.address + "=" + encodeURIComponent(customer.address) +
-  "&" + ENTRY.products + "=" + encodeURIComponent(products) +
-  "&" + ENTRY.total + "=" + encodeURIComponent(total);
+  "&" + ENTRY.products + "=" + encodeURIComponent(productText) +
+  "&" + ENTRY.total + "=" + encodeURIComponent(total.toLocaleString("vi-VN")) +
+  "&submit=Submit";
 
-// Xóa giỏ hàng sau khi gửi
+// GỬI FORM (KHÔNG CẦN APPS SCRIPT)
+fetch(FORM_URL, {
+  method: "POST",
+  mode: "no-cors",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  body: params
+});
+
+// XÓA GIỎ HÀNG
 localStorage.removeItem("cart");
 
-// Chuyển sang Google Form
-window.location.href = url;
+// CHUYỂN TRANG
+setTimeout(() => {
+  window.location.href = "thankyou.html";
+}, 800);
 </script>
 
 </body>
