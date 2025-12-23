@@ -10,55 +10,138 @@ html, body {
   background: #f7f7f7;
 }
 
-h1 {
+h1, h2 {
   text-align: center;
   margin: 20px 0;
 }
 
-.grid {
+/* ===== GRID SẢN PHẨM ===== */
+.product-grid {
   width: 100%;
-  padding: 20px;
+  padding: 15px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
 }
 
+/* ===== CARD ===== */
 .product {
   background: white;
-  border-radius: 10px;
-  padding: 15px;
+  border-radius: 12px;
+  padding: 12px;
   text-align: center;
   box-shadow: 0 4px 10px rgba(0,0,0,.1);
 }
 
+/* ===== LINK BAO ẢNH + TÊN ===== */
+.product a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===== ẢNH ===== */
 .product img {
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
+  transition: transform .2s ease;
 }
 
+.product img:hover {
+  transform: scale(1.03);
+}
+
+/* ===== TÊN ===== */
 .product h3 {
-  font-size: 16px;
-  margin: 10px 0;
+  font-size: 15px;
+  margin: 10px 0 6px;
+  min-height: 40px;
 }
 
+/* ===== GIÁ ===== */
 .price {
   color: #e53935;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  font-size: 15px;
 }
 
-.buy-btn {
+/* ===== NÚT ===== */
+.buy-btn,
+button {
   display: block;
+  width: 100%;
   padding: 10px;
   background: #1976d2;
   color: white;
-  border-radius: 6px;
+  border-radius: 8px;
   text-decoration: none;
   font-weight: bold;
+  border: none;
+  cursor: pointer;
 }
 
-.buy-btn:hover {
+.buy-btn:hover,
+button:hover {
   background: #0d47a1;
 }
+
+/* ===== TRANG CHI TIẾT ===== */
+.product-detail {
+  max-width: 480px;
+  margin: auto;
+  padding: 15px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+}
+
+.product-detail img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.product-detail h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.product-detail .price {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.product-detail p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+/* ===== CART ===== */
+.cart-item {
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.cart-item button {
+  width: auto;
+  margin-right: 5px;
+  padding: 6px 10px;
+}
+
+/* ===== MOBILE FIX ===== */
+@media (max-width: 480px) {
+  .product img {
+    height: 160px;
+  }
+
+  .product-detail {
+    border-radius: 0;
+    box-shadow: none;
+  }
+  }
+  
