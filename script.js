@@ -1,7 +1,3 @@
-const CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
-
-// ================= GIỎ HÀNG =================
 function getCart() {
   return JSON.parse(localStorage.getItem("cart")) || [];
 }
@@ -10,30 +6,49 @@ function saveCart(cart) {
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-function addToCartById(id) {
-  const products = window.ALL_PRODUCTS || [];
-  const product = products.find(p => p.id === id);
-  if (!product) return;
-
+function renderCart() {
   const cart = getCart();
-  const found = cart.find(p => p.id === product.id);
+  const cartEl = document.getElementById("cart");
+  const totalEl = document.getElementById("total");
+  if (!cartEl) return;
 
-  if (found) {
-    found.qty += 1;
-  } else {
-    cart.push({ ...product, qty: 1 });
-  }
+  cartEl.innerHTML = "";
+  let total = 0;
 
-  saveCart(cart);
-  window.location.href = "cart.html";
+  cart.forEach((item, i) => {
+    total += item.price * item.qty;
+
+    cartEl.innerHTML += `
+      <div>
+        <b>${item.name}</b><br>
+        ${item.price.toLocaleString("vi-VN")} ₫ x ${item.qty}<br>
+        <button onclick="changeQty(${i},1)">+</button>
+        <button onclick="changeQty(${i},-1)">-</button>
+        <button onclick="removeItem(${i})">Xóa</button>
+      </div>
+      <hr>
+    `;
+  });
+
+  totalEl.innerText = total.toLocaleString("vi-VN") + " ₫";
 }
 
-// ================= LOAD SẢN PHẨM =================
-fetch(CSV_URL)
-  .then(res => res.text())
-  .then(text => {
-    const rows = text.trim().split("\n").slice(1);
-    const container = document.getElementById("products");
+function changeQty(i, d) {
+  const cart = getCart();
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+function removeItem(i) {
+  const cart = getCart();
+  cart.splice(i, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+renderCart();
     if (!container) return;
 
     container.innerHTML = "";
