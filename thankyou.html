@@ -2,19 +2,48 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Hoàn tất</title>
+  <title>Hoàn tất đơn hàng</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>🎉 Đặt hàng thành công!</h1>
-<p style="text-align:center">Chúng tôi sẽ liên hệ sớm nhất</p>
+<div style="max-width:500px;margin:auto;text-align:center;padding:30px">
 
-<div style="text-align:center;margin-top:20px">
-  <a href="https://sites.google.com/view/vngcosmetics/" class="buy-btn">
-    Quay lại trang giới thiệu
-  </a>
+  <h1>🎉 Đặt hàng thành công!</h1>
+
+  <p>
+    Cảm ơn bạn đã đặt hàng tại <b>VNG Cosmetics</b> 💖<br>
+    Shop sẽ liên hệ xác nhận đơn hàng trong thời gian sớm nhất.
+  </p>
+
+  <hr style="margin:20px 0">
+
+  <p style="font-size:14px;color:#555">
+    📞 Vui lòng để ý điện thoại trong giờ hành chính<br>
+    🚚 Thời gian giao hàng: 1–3 ngày (tuỳ khu vực)
+  </p>
+
+  <div style="margin-top:25px">
+    <a href="index.html">
+      <button class="buy-btn">🛍 Tiếp tục mua sắm</button>
+    </a>
+  </div>
+
+  <div style="margin-top:15px">
+    <a href="https://sites.google.com/view/vngcosmetics/">
+      Quay lại trang giới thiệu
+    </a>
+  </div>
+
 </div>
+
+<script>
+  // Dọn giỏ hàng lần cuối (phòng trường hợp chưa xoá)
+  localStorage.removeItem("cart");
+</script>
 
 </body>
 </html>
