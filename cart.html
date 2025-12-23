@@ -3,29 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Giỏ hàng</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 
 <body>
 
 <h2>🛒 Giỏ hàng</h2>
 
-<div id="cart"></div>
-<h3>Tổng tiền: <span id="total">0 ₫</span></h3>
+<div id="cart">
+  <!-- JS render sản phẩm ở đây -->
+</div>
 
-<a href="confirm.html">Tiếp tục đặt hàng</a>
+<h3>
+  Tổng tiền:
+  <span id="total">0 ₫</span>
+</h3>
 
-<script src="script.js"></script>
-</body>
-</html>
-  });
-
-  localStorage.removeItem("cart");
-
-  setTimeout(() => {
-    window.location.href = "thankyou.html";
-  }, 800);
-};
-</script>
+<div style="margin-top:20px;">
+  <a href="index.html">⬅ Tiếp tục mua hàng</a>
+  <br><br>
+  <a href="confirm.html">
+    <button>Tiến hành đặt hàng</button>
+  </a>
+</div>
 
 </body>
 </html>
