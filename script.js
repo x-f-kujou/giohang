@@ -1,39 +1,109 @@
+const CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
+
+/* ========= CART ========= */
 function getCart() {
-  return JSON.parse(localStorage.getItem("cart")) || [];
+  return JSON.parse(localStorage.getItem("cart") || "[]");
 }
 
 function saveCart(cart) {
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-function renderCart() {
+function addToCart(product) {
   const cart = getCart();
-  const cartEl = document.getElementById("cart");
-  const totalEl = document.getElementById("total");
-  if (!cartEl) return;
+  const found = cart.find(p => p.id === product.id);
 
-  cartEl.innerHTML = "";
-  let total = 0;
+  if (found) {
+    found.qty += 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
 
-  cart.forEach((item, i) => {
-    total += item.price * item.qty;
-
-    cartEl.innerHTML += `
-      <div>
-        <b>${item.name}</b><br>
-        ${item.price.toLocaleString("vi-VN")} ₫ x ${item.qty}<br>
-        <button onclick="changeQty(${i},1)">+</button>
-        <button onclick="changeQty(${i},-1)">-</button>
-        <button onclick="removeItem(${i})">Xóa</button>
-      </div>
-      <hr>
-    `;
-  });
-
-  totalEl.innerText = total.toLocaleString("vi-VN") + " ₫";
+  saveCart(cart);
+  window.location.href = "cart.html";
 }
 
 function changeQty(i, d) {
+  const cart = getCart();
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+function removeItem(i) {
+  const cart = getCart();
+  cart.splice(i, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+/* ========= LOAD PRODUCTS ========= */
+fetch(CSV_URL)
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.trim().split("\n").slice(1);
+    const container = document.getElementById("products");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    rows.forEach(row => {
+      const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+
+      const product = {
+        id: cols[0],
+        name: cols[1],
+        price: Number(cols[2]),
+        image: cols[3]?.replace(/"/g, "")
+      };
+
+      if (!product.name || !product.price || !product.image) return;
+
+      container.innerHTML += `
+        <div class="product">
+          <img src="${product.image}" alt="${product.name}">
+          <h3>${product.name}</h3>
+          <div class="price">${product.price.toLocaleString("vi-VN")} ₫</div>
+          <button onclick='addToCart(${JSON.stringify(product)})'>
+            Thêm vào giỏ
+          </button>
+        </div>
+      `;
+    });
+  })
+  .catch(() => {
+    document.getElementById("products").innerHTML =
+      "<p>Lỗi tải sản phẩm</p>";
+  });
+
+/* ========= CART PAGE ========= */
+function renderCart() {
+  const cart = getCart();
+  const box = document.getElementById("cart");
+  const totalBox = document.getElementById("total");
+
+  if (!box) return;
+
+  box.innerHTML = "";
+  let total = 0;
+
+  cart.forEach((p, i) => {
+    total += p.price * p.qty;
+    box.innerHTML += `
+      <div class="cart-item">
+        <b>${p.name}</b><br>
+        ${p.price.toLocaleString("vi-VN")} ₫ x ${p.qty}<br>
+        <button onclick="changeQty(${i},-1)">−</button>
+        <button onclick="changeQty(${i},1)">+</button>
+        <button onclick="removeItem(${i})">Xóa</button>
+      </div>
+    `;
+  });
+
+  totalBox.innerText = total.toLocaleString("vi-VN") + " ₫";
+}
   const cart = getCart();
   cart[i].qty += d;
   if (cart[i].qty <= 0) cart.splice(i, 1);
