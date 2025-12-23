@@ -1,6 +1,7 @@
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
 
+// ================= GIỎ HÀNG =================
 function getCart() {
   return JSON.parse(localStorage.getItem("cart")) || [];
 }
@@ -9,7 +10,11 @@ function saveCart(cart) {
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-function addToCart(product) {
+function addToCartById(id) {
+  const products = window.ALL_PRODUCTS || [];
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+
   const cart = getCart();
   const found = cart.find(p => p.id === product.id);
 
@@ -23,7 +28,7 @@ function addToCart(product) {
   window.location.href = "cart.html";
 }
 
-// LOAD SẢN PHẨM
+// ================= LOAD SẢN PHẨM =================
 fetch(CSV_URL)
   .then(res => res.text())
   .then(text => {
@@ -32,33 +37,37 @@ fetch(CSV_URL)
     if (!container) return;
 
     container.innerHTML = "";
+    window.ALL_PRODUCTS = [];
 
     rows.forEach(row => {
       const cols = row.split(",");
+
       const product = {
-        id: cols[0],
-        name: cols[1],
+        id: cols[0]?.trim(),
+        name: cols[1]?.trim(),
         price: Number(cols[2]),
-        image: cols[3]
+        image: cols[3]?.trim()
       };
 
-      if (!product.name || !product.price || !product.image) return;
+      if (!product.id || !product.name || !product.price || !product.image) return;
+
+      window.ALL_PRODUCTS.push(product);
 
       container.innerHTML += `
         <div class="product">
-          <img src="${encodeURI(product.image)}">
+          <img src="${encodeURI(product.image)}" alt="${product.name}">
           <h3>${product.name}</h3>
-          <div class="price">${product.price.toLocaleString("vi-VN")} ₫</div>
-
-          <button class="buy-btn"
-            onclick='addToCart(${JSON.stringify(product)})'>
+          <div class="price">
+            ${product.price.toLocaleString("vi-VN")} ₫
+          </div>
+          <button class="buy-btn" onclick="addToCartById('${product.id}')">
             Thêm vào giỏ
           </button>
         </div>
       `;
     });
-  });
+  })
   .catch(() => {
-    document.getElementById("products").innerHTML =
-      "<p>Lỗi tải sản phẩm</p>";
+    const el = document.getElementById("products");
+    if (el) el.innerHTML = "<p>Lỗi tải sản phẩm</p>";
   });
