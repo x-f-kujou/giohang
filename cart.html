@@ -1,67 +1,33 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <title>Giỏ hàng</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<h1>🛒 Giỏ hàng</h1>
-
-<div id="cart" style="max-width:600px;margin:auto;"></div>
-<h2 id="total" style="text-align:center"></h2>
-
-<div style="max-width:400px;margin:20px auto;">
-  <input id="name" placeholder="Tên khách hàng" style="width:100%;padding:10px;margin-bottom:10px">
-  <input id="phone" placeholder="Số điện thoại" style="width:100%;padding:10px;margin-bottom:10px">
-  <button id="submit" class="buy-btn">Xác nhận đơn</button>
-</div>
+<form id="orderForm" action="https://docs.google.com/forms/d/19Xt8NNu1OuJod_dj4NN4uQlwVpoXcvTxrCx-T_01uRo/formResponse" method="POST" target="_self">
+  <!-- Ô nhập dữ liệu hiển thị cho người dùng -->
+  <label>Tên khách hàng:
+    <input type="text" id="customerName" name="entry.7182938401" required>
+  </label><br>
+  <label>Số điện thoại:
+    <input type="text" id="phoneNumber" name="entry.9371826540" required>
+  </label><br>
+  <!-- Ô ẩn để chứa dữ liệu sản phẩm và tổng tiền -->
+  <input type="hidden" id="productList" name="entry.4123789056">
+  <input type="hidden" id="totalAmount" name="entry.6685492037">
+  <button type="submit">Gửi đơn hàng</button>
+</form>
 
 <script>
-const SCRIPT_URL = "LINK_GOOGLE_APPS_SCRIPT_CỦA_BẠN";
+// Giả sử giỏ hàng lưu trong localStorage dưới key 'cart' (dạng JSON string)
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-function getCart() {
-  return JSON.parse(localStorage.getItem("cart")) || [];
-}
+// Tạo chuỗi danh sách sản phẩm và tính tổng
+let productNames = [];
+let total = 0;
+cart.forEach(item => {
+  productNames.push(item.name + " (x" + item.quantity + ")");
+  total += item.price * item.quantity;
+});
 
-function saveCart(cart) {
-  localStorage.setItem("cart", JSON.stringify(cart));
-  renderCart();
-}
-
-function renderCart() {
-  const cart = getCart();
-  const box = document.getElementById("cart");
-  let total = 0;
-
-  if (cart.length === 0) {
-    box.innerHTML = "<p>Giỏ hàng trống</p>";
-    return;
-  }
-
-  box.innerHTML = "";
-  cart.forEach((p, i) => {
-    total += p.price * p.qty;
-
-    box.innerHTML += `
-      <div class="product" style="margin-bottom:10px">
-        <h3>${p.name}</h3>
-        <p>${p.price.toLocaleString("vi-VN")} ₫ × ${p.qty}</p>
-
-        <button onclick="updateQty(${i},1)">+</button>
-        <button onclick="updateQty(${i},-1)">−</button>
-        <button onclick="removeItem(${i})">Xoá</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("total").innerText =
-    "Tổng tiền: " + total.toLocaleString("vi-VN") + " ₫";
-}
-
-function updateQty(i, d) {
-  const cart = getCart();
+// Điền dữ liệu vào form trước khi submit
+document.getElementById("productList").value = productNames.join(", ");
+document.getElementById("totalAmount").value = total;
+</script>
   cart[i].qty += d;
   if (cart[i].qty <= 0) cart.splice(i, 1);
   saveCart(cart);
