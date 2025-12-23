@@ -1,66 +1,22 @@
-<form
-  id="orderForm"
-  action="https://docs.google.com/forms/d/19Xt8NNu1OuJod_dj4NN4uQlwVpoXcvTxrCx-T_01uRo/formResponse"
-  method="POST"
-  target="_self"
->
-  <label>
-    Tên khách hàng:
-    <input type="text" name="entry.7182938401" required>
-  </label><br><br>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Giỏ hàng</title>
+</head>
 
-  <label>
-    Số điện thoại:
-    <input type="text" name="entry.9371826540" required>
-  </label><br><br>
+<body>
 
-  <!-- hidden -->
-  <input type="hidden" id="productList" name="entry.4123789056">
-  <input type="hidden" id="totalAmount" name="entry.6685492037">
+<h2>🛒 Giỏ hàng</h2>
 
-  <button type="submit">Gửi đơn hàng</button>
-</form>
+<div id="cart"></div>
+<h3>Tổng tiền: <span id="total">0 ₫</span></h3>
 
-<script>
-  // ====== LẤY GIỎ HÀNG ======
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+<a href="confirm.html">Tiếp tục đặt hàng</a>
 
-  let productNames = [];
-  let total = 0;
-
-  cart.forEach(item => {
-    productNames.push(`${item.name} (x${item.qty})`);
-    total += item.price * item.qty;
-  });
-
-  document.getElementById("productList").value = productNames.join(", ");
-  document.getElementById("totalAmount").value = total;
-
-  // ====== SAU KHI SUBMIT → XÓA GIỎ ======
-  document.getElementById("orderForm").addEventListener("submit", () => {
-    localStorage.removeItem("cart");
-  });
-</script>
-  const cart = getCart();
-  cart.splice(i, 1);
-  saveCart(cart);
-}
-
-renderCart();
-
-document.getElementById("submit").onclick = () => {
-  const order = {
-    name: name.value,
-    phone: phone.value,
-    items: getCart(),
-    time: new Date().toLocaleString("vi-VN")
-  };
-
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(order)
+<script src="script.js"></script>
+</body>
+</html>
   });
 
   localStorage.removeItem("cart");
