@@ -2,62 +2,46 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Xác nhận đơn hàng</title>
+  <title>Thông tin giao hàng</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h2>📦 Thông tin giao hàng</h2>
+<h2>🛒 Thông tin giao hàng</h2>
 
-<form
-  id="orderForm"
-  action="https://docs.google.com/forms/d/19Xt8NNu1OuJod_dj4NN4uQlwVpoXcvTxrCx-T_01uRo/formResponse"
-  method="POST"
->
+<label>Tên khách hàng</label><br>
+<input id="name" required><br><br>
 
-  <label>Tên khách hàng</label>
-  <input type="text" name="entry.7182938401" required>
+<label>Số điện thoại</label><br>
+<input id="phone" required><br><br>
 
-  <label>Số điện thoại</label>
-  <input type="text" name="entry.9371826540" required>
+<label>Địa chỉ giao hàng</label><br>
+<input id="address" required><br><br>
 
-  <label>Địa chỉ giao hàng</label>
-  <!-- ⚠️ THAY entry.XXXXXXXX bằng field thật trong Google Form -->
-  <input type="text" name="entry.XXXXXXXX" required>
-
-  <label>Ghi chú</label>
-  <!-- ⚠️ THAY entry.YYYYYYYY bằng field thật trong Google Form -->
-  <input type="text" name="entry.YYYYYYYY">
-
-  <!-- ẨN: sản phẩm + tổng tiền -->
-  <input type="hidden" id="productList" name="entry.4123789056">
-  <input type="hidden" id="totalAmount" name="entry.6685492037">
-
-  <button type="submit">🧾 Gửi đơn hàng</button>
-</form>
+<button onclick="saveInfo()">TIẾP TỤC</button>
 
 <script>
-/* ========= LOAD CART ========= */
-const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+function saveInfo() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const address = document.getElementById("address").value.trim();
 
-let products = [];
-let total = 0;
+  if (!name || !phone || !address) {
+    alert("Vui lòng nhập đầy đủ thông tin");
+    return;
+  }
 
-cart.forEach(item => {
-  products.push(`${item.name} (x${item.qty})`);
-  total += item.price * item.qty;
-});
+  // Lưu thông tin khách
+  localStorage.setItem("customer", JSON.stringify({
+    name,
+    phone,
+    address
+  }));
 
-document.getElementById("productList").value = products.join(", ");
-document.getElementById("totalAmount").value = total;
-
-/* ========= CLEAR CART AFTER SUBMIT ========= */
-document.getElementById("orderForm").addEventListener("submit", () => {
-  localStorage.removeItem("cart");
-});
+  // Sang trang gửi Google Form
+  window.location.href = "send.html";
+}
 </script>
 
 </body>
