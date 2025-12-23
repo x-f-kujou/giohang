@@ -9,36 +9,32 @@ fetch(CSV_URL)
     container.innerHTML = "";
 
     rows.forEach(row => {
-      // PARSE CSV ĐÚNG (chỉ tách 4 cột đầu)
-      const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-      if (!cols || cols.length < 4) return;
-
+      const cols = row.split(",");
       const id = cols[0];
       const ten = cols[1];
       const gia = Number(cols[2]);
-      const anh = cols[3].replace(/"/g, "").trim();
+      const anh = cols[3];
 
       if (!ten || !gia || !anh) return;
 
       container.innerHTML += `
         <div class="product">
-          <img src="${encodeURI(anh)}" alt="${ten}" loading="lazy">
+          <img src="${encodeURI(anh)}">
           <h3>${ten}</h3>
           <div class="price">${gia.toLocaleString("vi-VN")} ₫</div>
-          <button onclick='addToCart(${JSON.stringify({
-            id,
-            name: ten,
-            price: gia,
-            image: anh
-          })})'>
+
+          <a
+            href="cart.html?id=${id}"
+            target="_blank"
+            class="buy-btn"
+          >
             Mua ngay
-          </button>
+          </a>
         </div>
       `;
     });
   })
-  .catch(err => {
-    console.error(err);
+  .catch(() => {
     document.getElementById("products").innerHTML =
       "<p>Lỗi tải sản phẩm</p>";
   });
