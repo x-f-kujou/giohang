@@ -2,38 +2,60 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Xác nhận thanh toán</title>
+  <title>Xác nhận đơn hàng</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: Arial;
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-    }
-    button {
-      background: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-  </style>
 </head>
 
 <body>
 
-<h2>✅ Xác nhận đã thanh toán</h2>
+<h2>🛒 Thông tin giao hàng</h2>
 
-<input id="phone" placeholder="Số điện thoại đã đặt hàng">
-<input id="note" placeholder="Ghi chú (VD: CK lúc 10h)">
+<form
+  id="orderForm"
+  action="https://docs.google.com/forms/d/19Xt8NNu1OuJod_dj4NN4uQlwVpoXcvTxrCx-T_01uRo/formResponse"
+  method="POST"
+>
 
+  <label>Tên khách hàng</label><br>
+  <input type="text" name="entry.7182938401" required><br><br>
+
+  <label>Số điện thoại</label><br>
+  <input type="text" name="entry.9371826540" required><br><br>
+
+  <label>Địa chỉ giao hàng</label><br>
+  <input type="text" name="entry.XXXXXXXX" required><br><br>
+
+  <label>Ghi chú</label><br>
+  <input type="text" name="entry.YYYYYYYY"><br><br>
+
+  <!-- ẨN -->
+  <input type="hidden" id="productList" name="entry.4123789056">
+  <input type="hidden" id="totalAmount" name="entry.6685492037">
+
+  <button type="submit">Gửi đơn hàng</button>
+</form>
+
+<script>
+const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+let products = [];
+let total = 0;
+
+cart.forEach(item => {
+  products.push(`${item.name} (x${item.qty})`);
+  total += item.price * item.qty;
+});
+
+document.getElementById("productList").value = products.join(", ");
+document.getElementById("totalAmount").value = total;
+
+document.getElementById("orderForm").addEventListener("submit", () => {
+  localStorage.removeItem("cart");
+});
+</script>
+
+</body>
+</html>
 <button onclick="sendConfirm()">Gửi xác nhận</button>
 
 <script>
