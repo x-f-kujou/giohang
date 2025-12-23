@@ -7,7 +7,10 @@
 </head>
 <body>
 
-<h1>Xác nhận đơn hàng</h1>
+<h1>🛒 Giỏ hàng</h1>
+
+<div id="cart" style="max-width:600px;margin:auto;"></div>
+<h2 id="total" style="text-align:center"></h2>
 
 <div style="max-width:400px;margin:20px auto;">
   <input id="name" placeholder="Tên khách hàng" style="width:100%;padding:10px;margin-bottom:10px">
@@ -18,10 +21,65 @@
 <script>
 const SCRIPT_URL = "LINK_GOOGLE_APPS_SCRIPT_CỦA_BẠN";
 
+function getCart() {
+  return JSON.parse(localStorage.getItem("cart")) || [];
+}
+
+function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCart();
+}
+
+function renderCart() {
+  const cart = getCart();
+  const box = document.getElementById("cart");
+  let total = 0;
+
+  if (cart.length === 0) {
+    box.innerHTML = "<p>Giỏ hàng trống</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+  cart.forEach((p, i) => {
+    total += p.price * p.qty;
+
+    box.innerHTML += `
+      <div class="product" style="margin-bottom:10px">
+        <h3>${p.name}</h3>
+        <p>${p.price.toLocaleString("vi-VN")} ₫ × ${p.qty}</p>
+
+        <button onclick="updateQty(${i},1)">+</button>
+        <button onclick="updateQty(${i},-1)">−</button>
+        <button onclick="removeItem(${i})">Xoá</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("total").innerText =
+    "Tổng tiền: " + total.toLocaleString("vi-VN") + " ₫";
+}
+
+function updateQty(i, d) {
+  const cart = getCart();
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart(cart);
+}
+
+function removeItem(i) {
+  const cart = getCart();
+  cart.splice(i, 1);
+  saveCart(cart);
+}
+
+renderCart();
+
 document.getElementById("submit").onclick = () => {
-  const data = {
+  const order = {
     name: name.value,
     phone: phone.value,
+    items: getCart(),
     time: new Date().toLocaleString("vi-VN")
   };
 
@@ -29,12 +87,14 @@ document.getElementById("submit").onclick = () => {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(order)
   });
+
+  localStorage.removeItem("cart");
 
   setTimeout(() => {
     window.location.href = "thankyou.html";
-  }, 700);
+  }, 800);
 };
 </script>
 
