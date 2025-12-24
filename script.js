@@ -19,17 +19,24 @@ function saveCart(cart) {
 }
 
 function addToCartById(id) {
-  const product = window.ALL_PRODUCTS.find(p => p.id === id);
-  if (!product) return;
+  const product = window.ALL_PRODUCTS.find(
+    p => p.id.toLowerCase() === id.toLowerCase()
+  );
+  if (!product) {
+    alert("Không tìm thấy sản phẩm");
+    return;
+  }
 
   const cart = getCart();
-  const found = cart.find(p => p.id === id);
+  const found = cart.find(
+    p => p.id.toLowerCase() === id.toLowerCase()
+  );
 
   if (found) found.qty += 1;
   else cart.push({ ...product, qty: 1 });
 
   saveCart(cart);
-  location.href = "cart.html";
+  window.location.href = "cart.html";
 }
 
 /**********************
@@ -37,15 +44,16 @@ function addToCartById(id) {
  **********************/
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("products");
+  window.ALL_PRODUCTS = [];
 
   fetch(CSV_URL)
     .then(res => res.text())
     .then(text => {
       const rows = text.trim().split("\n").slice(1);
-      window.ALL_PRODUCTS = [];
       if (container) container.innerHTML = "";
 
       rows.forEach(row => {
+        // split CSV an toàn (có dấu , trong text)
         const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
         const product = {
@@ -56,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
           desc: cols[4]?.replace(/"/g, "").trim() || ""
         };
 
+        // chỉ bỏ qua khi thiếu ID hoặc tên
         if (!product.id || !product.name) return;
 
         window.ALL_PRODUCTS.push(product);
@@ -63,12 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (container) {
           container.innerHTML += `
             <div class="product">
-              <a href="product.html?id=${product.id}">
+              <a href="product.html?id=${encodeURIComponent(product.id)}">
                 <img src="${product.image}" alt="${product.name}">
               </a>
 
               <h3>
-                <a href="product.html?id=${product.id}">
+                <a href="product.html?id=${encodeURIComponent(product.id)}">
                   ${product.name}
                 </a>
               </h3>
@@ -86,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      console.log("ĐÃ LOAD:", window.ALL_PRODUCTS.length, "sản phẩm");
+      console.log("ĐÃ LOAD", window.ALL_PRODUCTS.length, "SẢN PHẨM");
     })
     .catch(err => {
       console.error(err);
@@ -101,7 +110,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const detailBox = document.getElementById("productDetail");
   if (!detailBox) return;
 
-  const id = new URLSearchParams(location.search).get("id");
+  const id = new URLSearchParams(window.location.search).get("id");
+  if (!id) {
+    detailBox.innerHTML = "<p>Thiếu ID sản phẩm</p>";
+    return;
+  }
 
   fetch(CSV_URL)
     .then(res => res.text())
@@ -111,10 +124,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       rows.forEach(row => {
         const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        if (cols[0]?.trim() === id) {
+        if (
+          cols[0] &&
+          cols[0].trim().toLowerCase() === id.toLowerCase()
+        ) {
           product = {
             id: cols[0].trim(),
-            name: cols[1].replace(/"/g, "").trim(),
+            name: cols[1]?.replace(/"/g, "").trim(),
             price: Number(cols[2]) || 0,
             image: cols[3]?.replace(/"/g, "").trim() || NO_IMAGE,
             desc: cols[4]?.replace(/"/g, "").trim() || ""
@@ -123,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (!product) {
-        detailBox.innerHTML = "<p>Không tìm thấy sản phẩm</p>";
+        detailBox.innerHTML = "<p>❌ Không tìm thấy sản phẩm</p>";
         return;
       }
 
@@ -131,13 +147,19 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="product-detail">
           <img src="${product.image}">
           <h2>${product.name}</h2>
-          <div class="price">${product.price.toLocaleString("vi-VN")} ₫</div>
+          <div class="price">
+            ${product.price.toLocaleString("vi-VN")} ₫
+          </div>
           <p>${product.desc || "Đang cập nhật mô tả..."}</p>
           <button onclick="addToCartById('${product.id}')">
             Thêm vào giỏ
           </button>
         </div>
       `;
+    })
+    .catch(err => {
+      console.error(err);
+      detailBox.innerHTML = "<p>Lỗi tải dữ liệu</p>";
     });
 });
 
@@ -186,3 +208,4 @@ function renderCart() {
 }
 
 document.addEventListener("DOMContentLoaded", renderCart);
+                                 
