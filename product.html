@@ -9,52 +9,11 @@
 
 <body>
 
+<h2>Chi tiết sản phẩm</h2>
+
 <div id="productDetail"></div>
 
 <script src="script.js"></script>
-
-<script>
-const params = new URLSearchParams(window.location.search);
-const productId = params.get("id");
-
-fetch(CSV_URL)
-  .then(res => res.text())
-  .then(text => {
-    const rows = text.trim().split("\n").slice(1);
-    let product = null;
-
-    rows.forEach(row => {
-      const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-
-      if (cols[0]?.trim() === productId) {
-        product = {
-          id: cols[0].trim(),
-          name: cols[1].trim(),
-          price: Number(cols[2]),
-          image: cols[3].replace(/"/g, "").trim(),
-          desc: cols[4]?.replace(/"/g, "").trim()
-        };
-      }
-    });
-
-    if (!product) {
-      document.getElementById("productDetail").innerHTML = "<p>Không tìm thấy sản phẩm</p>";
-      return;
-    }
-
-    document.getElementById("productDetail").innerHTML = `
-      <div class="product-detail">
-        <img src="${product.image}">
-        <h2>${product.name}</h2>
-        <div class="price">${product.price.toLocaleString("vi-VN")} ₫</div>
-        <p>${product.desc || "Đang cập nhật mô tả..."}</p>
-        <button onclick='addToCart(${JSON.stringify(product)})'>
-          Thêm vào giỏ
-        </button>
-      </div>
-    `;
-  });
-</script>
 
 </body>
 </html>
