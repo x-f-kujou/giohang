@@ -1,4 +1,4 @@
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPq";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/1kruA930nxObgYqZIOCrEVbxsfPXBcrSOhYgixqRWDPM/edit?usp=drivesdk";
 const NO_IMAGE = "https://via.placeholder.com/300x300?text=No+Image";
 
 /* ===== LOAD LIST ===== */
