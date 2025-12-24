@@ -29,69 +29,115 @@ function addToCartById(id) {
   else cart.push({ ...product, qty: 1 });
 
   saveCart(cart);
-  window.location.href = "cart.html";
+  location.href = "cart.html";
 }
 
 /**********************
- * LOAD PRODUCTS (FIX CSV)
+ * LOAD PRODUCT LIST
  **********************/
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("products");
-  if (!container) return;
 
   fetch(CSV_URL)
     .then(res => res.text())
     .then(text => {
       const rows = text.trim().split("\n").slice(1);
-      container.innerHTML = "";
       window.ALL_PRODUCTS = [];
+      if (container) container.innerHTML = "";
 
-      rows.forEach((row, index) => {
-        // Tách CSV an toàn (có dấu , trong tên)
+      rows.forEach(row => {
         const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
-        const id = cols[0]?.trim();
-        const name = cols[1]?.replace(/"/g, "").trim();
-        const price = Number(cols[2]);
-        const image = cols[3]
-          ? cols[3].replace(/"/g, "").trim()
-          : NO_IMAGE;
-
-        // 👉 CHỈ BỎ QUA KHI THIẾU ID HOẶC TÊN
-        if (!id || !name) {
-          console.warn("Bỏ dòng lỗi:", index + 2, cols);
-          return;
-        }
-
         const product = {
-          id,
-          name,
-          price: isNaN(price) ? 0 : price,
-          image: image || NO_IMAGE
+          id: cols[0]?.trim(),
+          name: cols[1]?.replace(/"/g, "").trim(),
+          price: Number(cols[2]) || 0,
+          image: cols[3]?.replace(/"/g, "").trim() || NO_IMAGE,
+          desc: cols[4]?.replace(/"/g, "").trim() || ""
         };
+
+        if (!product.id || !product.name) return;
 
         window.ALL_PRODUCTS.push(product);
 
-        container.innerHTML += `
-          <div class="product">
-            <img src="${encodeURI(product.image)}" alt="${product.name}">
-            <h3>${product.name}</h3>
-            <div class="price">
-              ${product.price.toLocaleString("vi-VN")} ₫
+        if (container) {
+          container.innerHTML += `
+            <div class="product">
+              <a href="product.html?id=${product.id}">
+                <img src="${product.image}" alt="${product.name}">
+              </a>
+
+              <h3>
+                <a href="product.html?id=${product.id}">
+                  ${product.name}
+                </a>
+              </h3>
+
+              <div class="price">
+                ${product.price.toLocaleString("vi-VN")} ₫
+              </div>
+
+              <button class="buy-btn"
+                onclick="addToCartById('${product.id}')">
+                Thêm vào giỏ
+              </button>
             </div>
-            <button class="buy-btn"
-              onclick="addToCartById('${product.id}')">
-              Thêm vào giỏ
-            </button>
-          </div>
-        `;
+          `;
+        }
       });
 
-      console.log("TỔNG SẢN PHẨM LOAD:", window.ALL_PRODUCTS.length);
+      console.log("ĐÃ LOAD:", window.ALL_PRODUCTS.length, "sản phẩm");
     })
     .catch(err => {
       console.error(err);
-      container.innerHTML = "<p>Lỗi tải sản phẩm</p>";
+      if (container) container.innerHTML = "<p>Lỗi tải sản phẩm</p>";
+    });
+});
+
+/**********************
+ * PRODUCT DETAIL PAGE
+ **********************/
+document.addEventListener("DOMContentLoaded", () => {
+  const detailBox = document.getElementById("productDetail");
+  if (!detailBox) return;
+
+  const id = new URLSearchParams(location.search).get("id");
+
+  fetch(CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = text.trim().split("\n").slice(1);
+      let product = null;
+
+      rows.forEach(row => {
+        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        if (cols[0]?.trim() === id) {
+          product = {
+            id: cols[0].trim(),
+            name: cols[1].replace(/"/g, "").trim(),
+            price: Number(cols[2]) || 0,
+            image: cols[3]?.replace(/"/g, "").trim() || NO_IMAGE,
+            desc: cols[4]?.replace(/"/g, "").trim() || ""
+          };
+        }
+      });
+
+      if (!product) {
+        detailBox.innerHTML = "<p>Không tìm thấy sản phẩm</p>";
+        return;
+      }
+
+      detailBox.innerHTML = `
+        <div class="product-detail">
+          <img src="${product.image}">
+          <h2>${product.name}</h2>
+          <div class="price">${product.price.toLocaleString("vi-VN")} ₫</div>
+          <p>${product.desc || "Đang cập nhật mô tả..."}</p>
+          <button onclick="addToCartById('${product.id}')">
+            Thêm vào giỏ
+          </button>
+        </div>
+      `;
     });
 });
 
