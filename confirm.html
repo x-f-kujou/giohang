@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Xác nhận đơn hàng</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Xác nhận thanh toán</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 
 <body>
 
-<h2>✅ Đặt hàng thành công</h2>
+<h2>💳 Thanh toán chuyển khoản</h2>
 
-<p>Cảm ơn bạn đã đặt hàng tại <b>VNG Cosmetics</b>.</p>
+<p><b>Ngân hàng:</b> MB Bank</p>
+<p><b>Số tài khoản:</b> 0358256608</p>
+<p><b>Chủ tài khoản:</b> VNG COSMETICS</p>
 
-<p>
-📞 <b>Hotline / Zalo:</b><br>
-<a href="tel:0358256608">0358 256 608</a><br>
-<a href="https://zalo.me/0358256608">Chat Zalo</a>
-</p>
+<img
+  src="https://img.vietqr.io/image/MB-0358256608-compact.png"
+  class="qr-img"
+/>
 
-<a href="index.html">⬅ Quay về trang sản phẩm</a>
+<br>
+
+<button onclick="submitOrderForm()" class="confirm-btn">
+  ✅ Tôi đã chuyển khoản
+</button>
 
 </body>
 </html>
