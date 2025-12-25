@@ -14,18 +14,20 @@
 
 <div id="cart"></div>
 
-<h3>
-  Tổng tiền:
-  <span id="total">0 ₫</span>
-</h3>
+<h3>Tổng tiền: <span id="total">0 ₫</span></h3>
 
-<div style="margin-top:20px;">
-  <a href="index.html">⬅ Tiếp tục mua hàng</a>
-  <br><br>
-  <a href="confirm.html">
-    <button>Tiến hành đặt hàng</button>
-  </a>
-</div>
+<button onclick="sendOrderToZalo()" class="zalo-btn">
+  📲 Gửi đơn qua Zalo
+</button>
+
+<br><br>
+
+<a href="confirm.html">
+  <button>💳 Thanh toán chuyển khoản</button>
+</a>
+
+<br><br>
+<a href="index.html">⬅ Quay lại mua hàng</a>
 
 </body>
 </html>
