@@ -110,7 +110,8 @@ function loadProducts() {
             <div class="price">
               ${p.price.toLocaleString("vi-VN")} ₫
             </div>
-            <button onclick='addToCart(${JSON.stringify(p)})'>
+            <button onclick="addToCartById('${p.id}')">
+          
               Thêm vào giỏ
             </button>
           </div>
