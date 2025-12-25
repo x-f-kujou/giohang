@@ -1,12 +1,14 @@
+/**********************
+ * CONFIG
+ **********************/
 const CSV_URL =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
 
-const NO_IMAGE = "https://via.placeholder.com/300";
+const NO_IMAGE = "https://via.placeholder.com/400x400?text=No+Image";
 
-/* ================= GLOBAL ================= */
-window.ALL_PRODUCTS = [];
-
-/* ================= CART ================= */
+/**********************
+ * CART
+ **********************/
 function getCart() {
   return JSON.parse(localStorage.getItem("cart") || "[]");
 }
@@ -23,7 +25,9 @@ function updateBadge() {
   if (el) el.innerText = count;
 }
 
-/* ================= TOAST ================= */
+/**********************
+ * TOAST
+ **********************/
 function showToast(text) {
   let t = document.getElementById("toast");
   if (!t) {
@@ -32,39 +36,35 @@ function showToast(text) {
     t.style.cssText = `
       position:fixed;bottom:20px;left:50%;
       transform:translateX(-50%);
-      background:#333;color:#fff;
-      padding:10px 16px;border-radius:6px;
-      z-index:9999;font-size:14px;
+      background:#323232;color:#fff;
+      padding:12px 18px;border-radius:8px;
+      font-size:14px;z-index:9999;
+      opacity:0;transition:.3s
     `;
     document.body.appendChild(t);
   }
   t.innerText = text;
-  t.style.display = "block";
-  setTimeout(() => t.style.display = "none", 2000);
+  t.style.opacity = 1;
+  setTimeout(() => (t.style.opacity = 0), 2000);
 }
 
-/* ================= ADD CART (FIX) ================= */
-function addToCartById(id) {
-  const product = window.ALL_PRODUCTS.find(p => p.id === id);
-  if (!product) return;
-
+/**********************
+ * ADD TO CART
+ **********************/
+function addToCart(product) {
   const cart = getCart();
-  const found = cart.find(p => p.id === id);
-  if (found) found.qty++;
+  const found = cart.find(p => p.id === product.id);
+
+  if (found) found.qty += 1;
   else cart.push({ ...product, qty: 1 });
 
   saveCart(cart);
   showToast("✅ Đã thêm vào giỏ hàng");
 }
 
-/* ================= LOAD PRODUCTS ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  updateBadge();
-  loadProducts();
-  renderCart();
-  loadProductDetail();
-});
-
+/**********************
+ * LOAD PRODUCT LIST
+ **********************/
 function loadProducts() {
   const box = document.getElementById("products");
   if (!box) return;
@@ -74,76 +74,101 @@ function loadProducts() {
     .then(t => {
       const rows = t.trim().split("\n").slice(1);
       box.innerHTML = "";
-      window.ALL_PRODUCTS = [];
 
-      rows.forEach(r => {
-        const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      rows.forEach(row => {
+        const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
         if (!c[0] || !c[1]) return;
 
         const p = {
           id: c[0].trim(),
-          name: c[1].replace(/"/g, "").trim(),
-          price: Number(c[2]) || 0,
-          image: c[3]?.replace(/"/g, "").trim() || NO_IMAGE,
-          desc: c[4]?.replace(/"/g, "").trim() || ""
-        };
-
-        window.ALL_PRODUCTS.push(p);
-
-        box.innerHTML += `
-          <div class="product">
-            <a href="product.html?id=${p.id}">
-              <img src="${p.image}">
-              <h3>${p.name}</h3>
-            </a>
-            <div class="price">${p.price.toLocaleString("vi-VN")} ₫</div>
-            <button onclick="addToCartById('${p.id}')">
-              Thêm vào giỏ
-            </button>
-          </div>
-        `;
-      });
-    });
-}
-
-/* ================= PRODUCT DETAIL ================= */
-function loadProductDetail() {
-  const box = document.getElementById("product-detail");
-  if (!box) return;
-
-  const id = new URLSearchParams(window.location.search).get("id");
-  if (!id) return;
-
-  fetch(CSV_URL)
-    .then(r => r.text())
-    .then(t => {
-      const rows = t.trim().split("\n").slice(1);
-      rows.forEach(r => {
-        const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        if (c[0]?.trim() !== id) return;
-
-        const p = {
-          id,
           name: c[1].replace(/"/g, ""),
           price: Number(c[2]) || 0,
           image: c[3]?.replace(/"/g, "") || NO_IMAGE,
           desc: c[4]?.replace(/"/g, "") || ""
         };
 
-        box.innerHTML = `
-          <img src="${p.image}" style="max-width:100%">
-          <h2>${p.name}</h2>
-          <div class="price">${p.price.toLocaleString("vi-VN")} ₫</div>
-          <p>${p.desc}</p>
-          <button onclick="addToCartById('${p.id}')">
-            🛒 Thêm vào giỏ
-          </button>
+        box.innerHTML += `
+          <div class="product">
+            <a href="product.html?id=${encodeURIComponent(p.id)}">
+              <img src="${p.image}">
+              <h3>${p.name}</h3>
+            </a>
+            <div class="price">
+              ${p.price.toLocaleString("vi-VN")} ₫
+            </div>
+            <button onclick='addToCart(${JSON.stringify(p)})'>
+              Thêm vào giỏ
+            </button>
+          </div>
         `;
       });
+    })
+    .catch(err => {
+      console.error(err);
+      box.innerHTML = "<p>Lỗi tải sản phẩm</p>";
     });
 }
 
-/* ================= CART PAGE ================= */
+/**********************
+ * PRODUCT DETAIL
+ **********************/
+function loadProductDetail() {
+  const box = document.getElementById("product-detail");
+  if (!box) return;
+
+  const id = new URLSearchParams(window.location.search).get("id");
+  if (!id) {
+    box.innerHTML = "<p>❌ Thiếu ID sản phẩm</p>";
+    return;
+  }
+
+  fetch(CSV_URL)
+    .then(r => r.text())
+    .then(t => {
+      const rows = t.trim().split("\n").slice(1);
+      let product = null;
+
+      rows.forEach(row => {
+        const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        if (c[0] && c[0].trim().toLowerCase() === id.toLowerCase()) {
+          product = {
+            id: c[0].trim(),
+            name: c[1]?.replace(/"/g, ""),
+            price: Number(c[2]) || 0,
+            image: c[3]?.replace(/"/g, "") || NO_IMAGE,
+            desc: c[4]?.replace(/"/g, "") || ""
+          };
+        }
+      });
+
+      if (!product) {
+        box.innerHTML = "<p>❌ Không tìm thấy sản phẩm</p>";
+        return;
+      }
+
+      box.innerHTML = `
+        <div class="product-detail">
+          <img src="${product.image}">
+          <h2>${product.name}</h2>
+          <div class="price">
+            ${product.price.toLocaleString("vi-VN")} ₫
+          </div>
+          <p>${product.desc || "Đang cập nhật mô tả..."}</p>
+          <button onclick='addToCart(${JSON.stringify(product)})'>
+            Thêm vào giỏ hàng
+          </button>
+        </div>
+      `;
+    })
+    .catch(err => {
+      console.error(err);
+      box.innerHTML = "<p>Lỗi tải dữ liệu</p>";
+    });
+}
+
+/**********************
+ * CART PAGE
+ **********************/
 function changeQty(i, d) {
   const cart = getCart();
   cart[i].qty += d;
@@ -175,11 +200,21 @@ function renderCart() {
         ${p.price.toLocaleString("vi-VN")} ₫ × ${p.qty}<br>
         <button onclick="changeQty(${i},-1)">−</button>
         <button onclick="changeQty(${i},1)">+</button>
-        <button onclick="removeItem(${i})">❌</button>
+        <button onclick="removeItem(${i})">❌ Xóa</button>
       </div>
     `;
   });
 
   totalBox.innerText = total.toLocaleString("vi-VN") + " ₫";
-          }
-                   
+}
+
+/**********************
+ * INIT
+ **********************/
+document.addEventListener("DOMContentLoaded", () => {
+  updateBadge();
+  loadProducts();
+  loadProductDetail();
+  renderCart();
+});
+        
