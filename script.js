@@ -29,23 +29,37 @@ function updateBadge() {
  * TOAST
  **********************/
 function showToast(text) {
-  let t = document.getElementById("toast");
-  if (!t) {
-    t = document.createElement("div");
-    t.id = "toast";
-    t.style.cssText = `
-      position:fixed;bottom:20px;left:50%;
-      transform:translateX(-50%);
-      background:#323232;color:#fff;
-      padding:12px 18px;border-radius:8px;
-      font-size:14px;z-index:9999;
-      opacity:0;transition:.3s
-    `;
-    document.body.appendChild(t);
+  let toast = document.getElementById("toast");
+
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast";
+
+    toast.style.position = "fixed";
+    toast.style.left = "50%";
+    toast.style.bottom = "30px";
+    toast.style.transform = "translateX(-50%)";
+    toast.style.background = "#323232";
+    toast.style.color = "#fff";
+    toast.style.padding = "12px 18px";
+    toast.style.borderRadius = "8px";
+    toast.style.fontSize = "14px";
+    toast.style.zIndex = "999999";
+    toast.style.opacity = "0";
+    toast.style.transition = "opacity .3s ease, bottom .3s ease";
+
+    document.body.appendChild(toast);
   }
-  t.innerText = text;
-  t.style.opacity = 1;
-  setTimeout(() => (t.style.opacity = 0), 2000);
+
+  toast.innerText = text;
+  toast.style.opacity = "1";
+  toast.style.bottom = "50px";
+
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.bottom = "30px";
+  }, 2000);
 }
 
 /**********************
