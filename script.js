@@ -217,4 +217,4 @@ document.addEventListener("DOMContentLoaded", () => {
   loadProductDetail();
   renderCart();
 });
-        
+          
