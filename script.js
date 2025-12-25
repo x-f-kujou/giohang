@@ -25,6 +25,33 @@ function updateBadge() {
   if (el) el.innerText = count;
 }
 
+function addToCartById(id) {
+  fetch(CSV_URL)
+    .then(r => r.text())
+    .then(t => {
+      const rows = t.trim().split("\n").slice(1);
+      let product = null;
+
+      rows.forEach(row => {
+        const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        if (c[0] && c[0].trim() === id) {
+          product = {
+            id: c[0].trim(),
+            name: c[1]?.replace(/"/g, ""),
+            price: Number(c[2]) || 0,
+            image: c[3]?.replace(/"/g, "") || NO_IMAGE,
+            desc: c[4]?.replace(/"/g, "") || ""
+          };
+        }
+      });
+
+      if (!product) return;
+
+      addToCart(product);
+    });
+}
+
+
 /**********************
  * TOAST
  **********************/
@@ -169,7 +196,7 @@ function loadProductDetail() {
             ${product.price.toLocaleString("vi-VN")} ₫
           </div>
           <p>${product.desc || "Đang cập nhật mô tả..."}</p>
-          <button onclick='addToCart(${JSON.stringify(product)})'>
+          <button onclick="addToCartById('${product.id}')">
             Thêm vào giỏ hàng
           </button>
         </div>
