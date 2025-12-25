@@ -41,6 +41,23 @@ h2 {
   padding: 2px 6px;
   border-radius: 50%;
 }
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #323232;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity .3s ease;
+  z-index: 9999;
+}
+.toast.show {
+  opacity: 1;
+}
 
 /* PRODUCT GRID */
 .product-grid {
