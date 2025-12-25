@@ -1,132 +1,105 @@
-/************ CONFIG ************/
 const CSV_URL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFH4wYQLPAfCV2-5AmnGniVcyQ6LqlSHxUEkBa8Vc8O3s-OvBWTT0ZHQqTKirZN3yV4Rzd3a_QPqMj/pub?output=csv";
 
-/************ CART ************/
+/* ================= CART ================= */
 function getCart() {
   return JSON.parse(localStorage.getItem("cart") || "[]");
 }
-
 function saveCart(cart) {
   localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartBadge();
+  updateBadge();
 }
-
-function updateCartBadge() {
+function updateBadge() {
   const cart = getCart();
   const count = cart.reduce((s, p) => s + p.qty, 0);
-  const badge = document.getElementById("cart-count");
-  if (badge) badge.innerText = count;
+  const el = document.getElementById("cart-count");
+  if (el) el.innerText = count;
 }
 
-/************ ADD TO CART ************/
-function addToCart(product) {
-  const cart = getCart();
-  const found = cart.find(p => p.id === product.id);
-
-  if (found) found.qty += 1;
-  else cart.push({ ...product, qty: 1 });
-
-  saveCart(cart);
-  alert("Đã thêm vào giỏ hàng");
-}
-
-/************ LOAD PRODUCTS ************/
+/* ================= LOAD PRODUCTS ================= */
 document.addEventListener("DOMContentLoaded", () => {
-  updateCartBadge();
-
-  const container = document.getElementById("products");
-  if (!container) return;
-
-  fetch(CSV_URL)
-    .then(r => r.text())
-    .then(text => {
-      const rows = text.trim().split("\n").slice(1);
-
-      rows.forEach(row => {
-        const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        if (!c[0] || !c[1]) return;
-
-        const product = {
-          id: c[0].trim(),
-          name: c[1].replace(/"/g,""),
-          price: Number(c[2]) || 0,
-          image: c[3]?.replace(/"/g,"") || "https://via.placeholder.com/300"
-        };
-
-        container.innerHTML += `
-          <div class="product">
-            <img src="${product.image}">
-            <h3>${product.name}</h3>
-            <div class="price">${product.price.toLocaleString("vi-VN")} ₫</div>
-            <button onclick='addToCart(${JSON.stringify(product)})'>
-              Thêm vào giỏ
-            </button>
-          </div>
-        `;
-      });
-    });
+  updateBadge();
+  loadList();
+  loadDetail();
+  renderCart();
 });
 
-/************ CART PAGE ************/
-function renderCart() {
-  const cart = getCart();
-  const box = document.getElementById("cart");
-  const totalBox = document.getElementById("total");
+function loadList() {
+  const box = document.getElementById("products");
   if (!box) return;
 
-  let total = 0;
-  box.innerHTML = "";
+  fetch(CSV_URL).then(r=>r.text()).then(t=>{
+    const rows = t.trim().split("\n").slice(1);
+    rows.forEach(r=>{
+      const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      if(!c[0]||!c[1])return;
 
-  cart.forEach(p => {
-    total += p.price * p.qty;
-    box.innerHTML += `
-      <div class="cart-item">
-        <b>${p.name}</b><br>
-        ${p.price.toLocaleString("vi-VN")} ₫ × ${p.qty}
-      </div>
-    `;
+      const p={
+        id:c[0].trim(),
+        name:c[1].replace(/"/g,""),
+        price:Number(c[2])||0,
+        image:c[3]?.replace(/"/g,"")||"https://via.placeholder.com/300"
+      };
+
+      box.innerHTML+=`
+      <div class="product">
+        <a href="product.html?id=${p.id}">
+          <img src="${p.image}">
+          <h3>${p.name}</h3>
+        </a>
+        <div class="price">${p.price.toLocaleString("vi-VN")} ₫</div>
+        <button onclick='addToCart(${JSON.stringify(p)})'>Thêm giỏ</button>
+      </div>`;
+    });
   });
-
-  totalBox.innerText = total.toLocaleString("vi-VN") + " ₫";
 }
 
-document.addEventListener("DOMContentLoaded", renderCart);
+/* ================= DETAIL ================= */
+function loadDetail() {
+  const box=document.getElementById("productDetail");
+  if(!box)return;
+  const id=new URLSearchParams(location.search).get("id");
+  if(!id)return;
 
-/************ ZALO ************/
-function sendOrderToZalo() {
-  const cart = getCart();
-  if (!cart.length) return alert("Giỏ hàng trống");
-
-  let msg = "🛒 ĐƠN HÀNG VNG COSMETICS%0A";
-  let total = 0;
-
-  cart.forEach(p => {
-    msg += `• ${p.name} x${p.qty}%0A`;
-    total += p.price * p.qty;
+  fetch(CSV_URL).then(r=>r.text()).then(t=>{
+    const rows=t.trim().split("\n").slice(1);
+    rows.forEach(r=>{
+      const c=r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      if(c[0].trim()===id){
+        box.innerHTML=`
+        <div class="product-detail">
+          <img src="${c[3]}">
+          <h2>${c[1]}</h2>
+          <div class="price">${Number(c[2]).toLocaleString("vi-VN")} ₫</div>
+          <button onclick='addToCart({id:"${id}",name:"${c[1]}",price:${c[2]},image:"${c[3]}"})'>
+            Thêm vào giỏ
+          </button>
+        </div>`;
+      }
+    });
   });
-
-  msg += `%0A👉 Tổng: ${total.toLocaleString("vi-VN")} ₫`;
-
-  window.open("https://zalo.me/0358256608?text=" + msg);
 }
 
-/************ GOOGLE FORM ************/
-function submitOrderForm() {
-  const cart = getCart();
-  let products = "";
-  let total = 0;
+/* ================= ADD CART ================= */
+function addToCart(p){
+  const cart=getCart();
+  const f=cart.find(i=>i.id===p.id);
+  if(f)f.qty++;
+  else cart.push({...p,qty:1});
+  saveCart(cart);
+  alert("Đã thêm vào giỏ");
+}
 
-  cart.forEach(p => {
-    products += `${p.name} x${p.qty} | `;
-    total += p.price * p.qty;
+/* ================= CART PAGE ================= */
+function renderCart(){
+  const box=document.getElementById("cart");
+  const totalBox=document.getElementById("total");
+  if(!box)return;
+  let t=0;
+  box.innerHTML="";
+  getCart().forEach(p=>{
+    t+=p.price*p.qty;
+    box.innerHTML+=`<p>${p.name} x${p.qty}</p>`;
   });
-
-  const formUrl =
-    "https://docs.google.com/forms/d/e/FORM_ID/viewform" +
-    "?entry.111111=" + encodeURIComponent(products) +
-    "&entry.222222=" + encodeURIComponent(total);
-
-  window.location.href = formUrl;
-          }
-          
+  totalBox.innerText=t.toLocaleString("vi-VN")+" ₫";
+    }
