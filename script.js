@@ -16,90 +16,106 @@ function updateBadge() {
   if (el) el.innerText = count;
 }
 
-/* ================= LOAD PRODUCTS ================= */
+/* ================= TOAST ================= */
+function showToast(text) {
+  let t = document.getElementById("toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "toast";
+    t.className = "toast";
+    document.body.appendChild(t);
+  }
+  t.innerText = text;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+/* ================= ADD CART ================= */
+function addToCart(product) {
+  const cart = getCart();
+  const found = cart.find(p => p.id === product.id);
+  if (found) found.qty++;
+  else cart.push({ ...product, qty: 1 });
+
+  saveCart(cart);
+  showToast("✅ Đã thêm vào giỏ hàng");
+}
+
+/* ================= LOAD PRODUCT LIST ================= */
 document.addEventListener("DOMContentLoaded", () => {
   updateBadge();
-  loadList();
-  loadDetail();
+  loadProducts();
   renderCart();
 });
 
-function loadList() {
+function loadProducts() {
   const box = document.getElementById("products");
   if (!box) return;
 
-  fetch(CSV_URL).then(r=>r.text()).then(t=>{
+  fetch(CSV_URL).then(r => r.text()).then(t => {
     const rows = t.trim().split("\n").slice(1);
-    rows.forEach(r=>{
+    rows.forEach(r => {
       const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-      if(!c[0]||!c[1])return;
+      if (!c[0] || !c[1]) return;
 
-      const p={
-        id:c[0].trim(),
-        name:c[1].replace(/"/g,""),
-        price:Number(c[2])||0,
-        image:c[3]?.replace(/"/g,"")||"https://via.placeholder.com/300"
+      const p = {
+        id: c[0].trim(),
+        name: c[1].replace(/"/g, ""),
+        price: Number(c[2]) || 0,
+        image: c[3]?.replace(/"/g, "") || "https://via.placeholder.com/300"
       };
 
-      box.innerHTML+=`
+      box.innerHTML += `
       <div class="product">
         <a href="product.html?id=${p.id}">
           <img src="${p.image}">
           <h3>${p.name}</h3>
         </a>
         <div class="price">${p.price.toLocaleString("vi-VN")} ₫</div>
-        <button onclick='addToCart(${JSON.stringify(p)})'>Thêm giỏ</button>
+        <button onclick='addToCart(${JSON.stringify(p)})'>
+          Thêm vào giỏ
+        </button>
       </div>`;
     });
   });
 }
 
-/* ================= DETAIL ================= */
-function loadDetail() {
-  const box=document.getElementById("productDetail");
-  if(!box)return;
-  const id=new URLSearchParams(location.search).get("id");
-  if(!id)return;
-
-  fetch(CSV_URL).then(r=>r.text()).then(t=>{
-    const rows=t.trim().split("\n").slice(1);
-    rows.forEach(r=>{
-      const c=r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-      if(c[0].trim()===id){
-        box.innerHTML=`
-        <div class="product-detail">
-          <img src="${c[3]}">
-          <h2>${c[1]}</h2>
-          <div class="price">${Number(c[2]).toLocaleString("vi-VN")} ₫</div>
-          <button onclick='addToCart({id:"${id}",name:"${c[1]}",price:${c[2]},image:"${c[3]}"})'>
-            Thêm vào giỏ
-          </button>
-        </div>`;
-      }
-    });
-  });
-}
-
-/* ================= ADD CART ================= */
-function addToCart(p){
-  const cart=getCart();
-  const f=cart.find(i=>i.id===p.id);
-  if(f)f.qty++;
-  else cart.push({...p,qty:1});
-  saveCart(cart);
-  alert("Đã thêm vào giỏ");
-}
-
 /* ================= CART PAGE ================= */
-function renderCart(){
-  const box=document.getElementById("cart");
-  const totalBox=document.getElementById("total");
-  if(!box)return;
-  let t=0;
-  box.innerHTML="";
-  getCart().forEach(p=>{
-    t+=p.price*p.qty;
-    box.innerHTML+=`<p>${p.name} x${p.qty}</p>`;
+function changeQty(i, d) {
+  const cart = getCart();
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+function removeItem(i) {
+  const cart = getCart();
+  cart.splice(i, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+function renderCart() {
+  const box = document.getElementById("cart");
+  const totalBox = document.getElementById("total");
+  if (!box || !totalBox) return;
+
+  let total = 0;
+  box.innerHTML = "";
+
+  getCart().forEach((p, i) => {
+    total += p.price * p.qty;
+    box.innerHTML += `
+      <div class="cart-item">
+        <b>${p.name}</b><br>
+        ${p.price.toLocaleString("vi-VN")} ₫ × ${p.qty}<br>
+        <button onclick="changeQty(${i},-1)">−</button>
+        <button onclick="changeQty(${i},1)">+</button>
+        <button onclick="removeItem(${i})">❌ Xóa</button>
+      </div>
+    `;
   });
-  totalBox.innerText=t.toLocaleString("vi-VN")+" ₫";
-    }
+
+  totalBox.innerText = total.toLocaleString("vi-VN") + " ₫";
+}
