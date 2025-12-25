@@ -1,48 +1,25 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Thông tin giao hàng</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Xác nhận đơn hàng</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h2>🛒 Thông tin giao hàng</h2>
+<h2>✅ Đặt hàng thành công</h2>
 
-<label>Tên khách hàng</label><br>
-<input id="name" required><br><br>
+<p>Cảm ơn bạn đã đặt hàng tại <b>VNG Cosmetics</b>.</p>
 
-<label>Số điện thoại</label><br>
-<input id="phone" required><br><br>
+<p>
+📞 <b>Hotline / Zalo:</b><br>
+<a href="tel:0358256608">0358 256 608</a><br>
+<a href="https://zalo.me/0358256608">Chat Zalo</a>
+</p>
 
-<label>Địa chỉ giao hàng</label><br>
-<input id="address" required><br><br>
-
-<button onclick="saveInfo()">TIẾP TỤC</button>
-
-<script>
-function saveInfo() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
-
-  if (!name || !phone || !address) {
-    alert("Vui lòng nhập đầy đủ thông tin");
-    return;
-  }
-
-  // Lưu thông tin khách
-  localStorage.setItem("customer", JSON.stringify({
-    name,
-    phone,
-    address
-  }));
-
-  // Sang trang gửi Google Form
-  window.location.href = "send.html";
-}
-</script>
+<a href="index.html">⬅ Quay về trang sản phẩm</a>
 
 </body>
 </html>
