@@ -1,31 +1,93 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Xác nhận thanh toán</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+<meta charset="UTF-8">
+<title>Xác nhận thanh toán</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <h2>💳 Thanh toán chuyển khoản</h2>
 
-<p><b>Ngân hàng:</b> MB Bank</p>
-<p><b>Số tài khoản:</b> 0358256608</p>
-<p><b>Chủ tài khoản:</b> VNG COSMETICS</p>
+<div class="product-detail">
 
-<img
-  src="https://img.vietqr.io/image/MB-0358256608-compact.png"
-  class="qr-img"
-/>
+<p><b>Ngân hàng:</b> Vietcombank</p>
+<p><b>Số TK:</b> 1027122144</p>
+<p><b>Chủ TK:</b> TU TU PHUONG</p>
+<p><b>Nội dung CK:</b> Tên + SĐT</p>
+
+<hr>
+
+<h3>📦 Thông tin đơn hàng</h3>
+
+<div id="orderInfo"></div>
 
 <br>
 
-<button onclick="submitOrderForm()" class="confirm-btn">
-  ✅ Tôi đã chuyển khoản
-</button>
+<button onclick="submitOrder()">✅ Tôi đã chuyển khoản</button>
+
+</div>
+
+<script>
+const FORM_URL =
+"https://docs.google.com/forms/d/e/1FAIpQLSc8Ts9qc4T-TRYX7my_6ryTBAis3bEU-yhrONjsZss1s15rIg/formResponse";
+
+/* ===== ENTRY ID – ĐỔI THEO FORM CỦA BẠN ===== */
+const ENTRY = {
+  name: "entry.1313927642",
+  phone: "entry.1798347891",
+  address: "entry.428704529",
+  products: "entry.131920185",
+  total: "entry.1824592539",
+  note: "entry.1497400442"
+};
+
+/* ===== LẤY GIỎ ===== */
+const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+let productText = "";
+let total = 0;
+
+cart.forEach(p => {
+  productText += `${p.name} (x${p.qty})\n`;
+  total += p.price * p.qty;
+});
+
+document.getElementById("orderInfo").innerHTML = `
+<p><b>Sản phẩm:</b><br>${productText.replace(/\n/g,"<br>")}</p>
+<p><b>Tổng tiền:</b> ${total.toLocaleString("vi-VN")} ₫</p>
+`;
+
+/* ===== SUBMIT FORM ===== */
+function submitOrder() {
+
+  const name = localStorage.getItem("customer_name") || "";
+  const phone = localStorage.getItem("customer_phone") || "";
+  const address = localStorage.getItem("customer_address") || "";
+
+  const formData = new FormData();
+  formData.append(ENTRY.name, name);
+  formData.append(ENTRY.phone, phone);
+  formData.append(ENTRY.address, address);
+  formData.append(ENTRY.products, productText);
+  formData.append(ENTRY.total, total);
+  formData.append(ENTRY.note, "Khách đã chuyển khoản");
+
+  fetch(FORM_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: formData
+  });
+
+  localStorage.removeItem("cart");
+
+  alert("✅ Đã gửi xác nhận! Shop sẽ liên hệ sớm.");
+
+  window.location.href = "thankyou.html";
+}
+</script>
 
 </body>
 </html>
